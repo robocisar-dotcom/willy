@@ -18,12 +18,11 @@
     <div id="bg"></div>
     <div id="container">
         <div id="clock">00:00</div>
-        <div id="date">Loading...</div>
+        <div id="date">Načítavam...</div>
     </div>
     <div id="status">Starting...</div>
 
     <script>
-        // TVOJE ID Z TABUĽKY
         const sheetId = '1vTC382du3NGc6b_DugnxS1y3-p-Yt1iBJ63cmkTIEIp8';
 
         function updateClock() {
@@ -37,12 +36,10 @@
         async function updateBackground() {
             const status = document.getElementById('status');
             try {
-                // Skúsime vytiahnuť dáta z tvojej publikovanej tabuľky
                 const response = await fetch(`https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`);
                 const text = await response.text();
                 const json = JSON.parse(text.substring(47).slice(0, -2));
                 
-                // Hľadáme ID fotiek v stĺpci D (index 3)
                 const photoIds = json.table.rows
                     .map(row => (row.c && row.c[3] && row.c[3].v) ? row.c[3].v.toString().trim() : null)
                     .filter(id => id && id.length > 20);
@@ -56,19 +53,19 @@
                     img.src = imgUrl;
                     img.onload = () => {
                         bg.style.backgroundImage = `url('${imgUrl}')`;
-                        status.innerText = "Last sync: " + new Date().toLocaleTimeString();
+                        status.innerText = "Sync: OK " + new Date().toLocaleTimeString();
                     };
                 } else {
-                    status.innerText = "No IDs found in column D";
+                    status.innerText = "No IDs in column D";
                 }
             } catch (error) {
-                status.innerText = "Connection error";
+                status.innerText = "Error: Connection";
                 console.error(error);
             }
         }
 
         setInterval(updateClock, 1000);
-        setInterval(updateBackground, 60000); // Zmena každú minútu
+        setInterval(updateBackground, 60000);
 
         updateClock();
         updateBackground();
