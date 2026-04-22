@@ -4,35 +4,39 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Willy Dashboard Pro</title>
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
-        body { margin: 0; background: #000; color: #fff; font-family: sans-serif; overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
+        body { margin: 0; background: #000; color: #fff; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
         
         /* POZADIE */
         #bg { position: fixed; width: 100%; height: 100%; z-index: -1; 
               background-size: cover; background-position: center center; 
-              transition: 1s ease-in-out; filter: brightness(0.6); background-color: #111; }
+              transition: 1s ease-in-out; filter: brightness(0.5); background-color: #111; }
         
         /* POČASIE V PRAVOM HORNOM ROHU */
-        #weather-container { position: absolute; top: 20px; right: 20px; display: flex; flex-direction: column; align-items: center; text-align: right; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 15px; backdrop-filter: blur(5px); }
+        #weather-container { position: absolute; top: 20px; right: 20px; display: flex; flex-direction: column; align-items: center; text-align: right; background: rgba(0,0,0,0.4); padding: 15px; border-radius: 20px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
         #weather-icon { width: 70px; height: 70px; }
-        #weather-temp { font-size: 2.2rem; font-weight: bold; }
-        #weather-feels { font-size: 1.1rem; opacity: 0.8; }
+        #weather-temp { font-size: 2.5rem; font-weight: bold; }
+        #weather-feels { font-size: 1rem; opacity: 0.7; }
 
-        /* HLAVNÝ KONTAJNER S HODINAMI */
+        /* HODINY */
         #main-container { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-        #clock { font-size: 10rem; font-weight: 900; margin: 0; line-height: 0.9; letter-spacing: -2px; }
-        #date { font-size: 2.2rem; opacity: 0.9; margin-top: 15px; font-weight: 300; }
+        #clock { font-size: 12rem; font-weight: 900; margin: 0; line-height: 0.8; letter-spacing: -5px; }
+        #date { font-size: 2.5rem; opacity: 0.9; margin-top: 20px; font-weight: 300; text-transform: capitalize; }
         
         /* TLAČIDLÁ PREPÍNANIA */
-        .btn-nav { position: absolute; top: 50%; transform: translateY(-50%); padding: 30px 15px; background: rgba(255,255,255,0.05); color: white; border: none; cursor: pointer; font-size: 2.5rem; border-radius: 10px; transition: 0.3s; z-index: 10; }
-        .btn-nav:hover { background: rgba(255,255,255,0.2); }
+        .btn-nav { position: absolute; top: 50%; transform: translateY(-50%); padding: 40px 20px; background: rgba(255,255,255,0.03); color: white; border: none; cursor: pointer; font-size: 3rem; border-radius: 15px; transition: 0.3s; z-index: 10; }
+        .btn-nav:hover { background: rgba(255,255,255,0.15); }
         #btn-prev { left: 10px; }
         #btn-next { right: 10px; }
 
-        /* DOLNÁ LIŠTA */
-        #nav-bar { position: fixed; bottom: 0; width: 100%; height: 80px; display: flex; background: rgba(0,0,0,0.8); backdrop-filter: blur(15px); border-top: 1px solid rgba(255,255,255,0.1); }
-        .nav-item { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 1rem; font-weight: bold; opacity: 0.4; text-transform: uppercase; letter-spacing: 1px; }
-        .nav-item.active { opacity: 1; border-top: 4px solid #fff; background: rgba(255,255,255,0.1); }
+        /* DOLNÁ LIŠTA S IKONAMI */
+        #nav-bar { position: fixed; bottom: 0; width: 100%; height: 100px; display: flex; background: rgba(0,0,0,0.85); backdrop-filter: blur(20px); border-top: 1px solid rgba(255,255,255,0.1); }
+        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0.4; transition: 0.3s; cursor: pointer; }
+        .nav-item i { font-size: 2.2rem; margin-bottom: 5px; }
+        .nav-item span { font-size: 0.8rem; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+        
+        .nav-item.active { opacity: 1; color: #fff; background: rgba(255,255,255,0.05); border-top: 4px solid #fff; }
     </style>
 </head>
 <body>
@@ -54,10 +58,22 @@
     </div>
 
     <nav id="nav-bar">
-        <div class="nav-item active">DOMOV</div>
-        <div class="nav-item">MÉDIÁ</div>
-        <div class="nav-item">OSVETLENIE</div>
-        <div class="nav-item">FLÓRA</div>
+        <div class="nav-item active">
+            <i class="material-icons">home</i>
+            <span>Domov</span>
+        </div>
+        <div class="nav-item">
+            <i class="material-icons">play_circle_filled</i>
+            <span>Médiá</span>
+        </div>
+        <div class="nav-item">
+            <i class="material-icons">lightbulb</i>
+            <span>Osvetlenie</span>
+        </div>
+        <div class="nav-item">
+            <i class="material-icons">local_florist</i>
+            <span>Flóra</span>
+        </div>
     </nav>
 
     <script>
@@ -78,7 +94,8 @@
 
         function showPhoto(index) {
             currentIndex = (index + allPhotoIds.length) % allPhotoIds.length;
-            const imgUrl = `https://drive.google.com/thumbnail?sz=w1920&id=${allPhotoIds[currentIndex]}`;
+            const imgId = allPhotoIds[currentIndex];
+            const imgUrl = `https://drive.google.com/thumbnail?sz=w1920&id=${imgId}`;
             const bg = document.getElementById('bg');
             const temp = new Image();
             temp.src = imgUrl;
@@ -89,7 +106,6 @@
 
         async function updateWeather() {
             try {
-                // Súradnice Trnava, pridaná apparent_temperature
                 const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=48.37&longitude=17.58&current_weather=true&hourly=apparent_temperature`);
                 const data = await res.json();
                 
@@ -119,7 +135,8 @@
         }
 
         setInterval(updateTime, 1000);
-        setInterval(updateWeather, 900000); // Každých 15 min.
+        setInterval(updateWeather, 900000); 
+        setInterval(() => changePhoto(1), 120000); // Auto-prehodenie každé 2 minúty
         
         loadPhotoList();
         updateWeather();
