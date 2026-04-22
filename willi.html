@@ -51,7 +51,10 @@
 
     <div id="light-overlay" class="overlay">
         <div class="grid">
-            <a href="https://home.google.com/" target="_blank" class="card"><i class="material-icons" style="color: #FBBC05;">tungsten</i><h2>Svetlá</h2></a>
+            <a href="https://home.google.com/home/1-5c1caa74efc1c6928a286a13ccfe4130cffd72956fd397a2bdc236d4f3c1d328/devices" target="_blank" class="card">
+                <i class="material-icons" style="color: #FBBC05;">tungsten</i>
+                <h2>Moje Svetlá</h2>
+            </a>
         </div>
         <button onclick="showSection('home')" style="margin-top:40px; color:white; background:none; border:1px solid #fff; padding:10px 30px; border-radius:20px; cursor:pointer;">Späť</button>
     </div>
@@ -79,7 +82,6 @@
         }
 
         async function loadData() {
-            // FOTKY - opravené pre tablet
             try {
                 const r = await fetch(`https://docs.google.com/spreadsheets/d/${S_ID}/export?format=csv&gid=${G_ID}`);
                 const t = await r.text();
@@ -87,19 +89,15 @@
                 if(ids.length > 0) {
                     const id = ids[Math.floor(Math.random()*ids.length)].replace(/"/g, '').trim();
                     const imgUrl = `https://drive.google.com/thumbnail?sz=w1920&id=${id}`;
-                    const img = new Image();
-                    img.src = imgUrl;
-                    img.onload = () => { document.getElementById('bg').style.backgroundImage = `url('${imgUrl}')`; };
+                    document.getElementById('bg').style.backgroundImage = `url('${imgUrl}')`;
                 }
             } catch(e) { console.log("Foto error"); }
             
-            // POČASIE - s ikonami
             try {
                 const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=48.37&longitude=17.58&current_weather=true`);
                 const d = await r.json();
                 const code = d.current_weather.weathercode;
                 document.getElementById('weather-temp').innerText = Math.round(d.current_weather.temperature) + '°C';
-                
                 const icon = document.getElementById('weather-icon');
                 if (code <= 3) icon.innerText = 'wb_sunny';
                 else if (code <= 67) icon.innerText = 'cloudy_snowing';
@@ -118,10 +116,6 @@
         setInterval(loadData, 600000);
         updateTime();
         loadData();
-
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('sw.js');
-        }
     </script>
 </body>
 </html>
