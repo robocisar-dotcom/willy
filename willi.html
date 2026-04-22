@@ -85,7 +85,6 @@ body {
     transform:translateY(-10px);
 }
 
-/* STRÁNKY */
 .page{ display:none; }
 .active{ display:block; }
 </style>
@@ -101,8 +100,8 @@ body {
 
 <!-- DOMOV -->
 <div id="p1" class="page active">
-    <div id="clock"></div>
-    <div id="date-sk"></div>
+    <div id="clock">00:00</div>
+    <div id="date-sk">...</div>
     <div id="agenda-box"></div>
 </div>
 
@@ -131,13 +130,23 @@ body {
 const sheetId='1wAMdy1V_88RKowxIeDsC8Q2ROgS8U44p2NeTfJBKyO8';
 const gid='602623609';
 
+/* 🕒 HODINY */
 function updateClock(){
-    let now=new Date();
-    clock.innerText=now.toLocaleTimeString('sk-SK',{hour:'2-digit',minute:'2-digit'});
+    const now=new Date();
+
+    document.getElementById('clock').innerText=
+        now.getHours().toString().padStart(2,'0')+":"+
+        now.getMinutes().toString().padStart(2,'0');
+
     document.getElementById('date-sk').innerText=
-        now.toLocaleDateString('sk-SK',{weekday:'long',day:'numeric',month:'long'});
+        now.toLocaleDateString('sk-SK',{
+            weekday:'long',
+            day:'numeric',
+            month:'long'
+        });
 }
 
+/* 📱 MENU */
 function showPage(id,btn){
     document.querySelectorAll('.page').forEach(p=>p.style.display='none');
     document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active-nav'));
@@ -145,50 +154,63 @@ function showPage(id,btn){
     btn.classList.add('active-nav');
 }
 
+/* 🌤 POČASIE */
 async function updateWeather(){
-    let res=await fetch('https://api.open-meteo.com/v1/forecast?latitude=48.3775&longitude=17.5883&current=temperature_2m,weather_code');
-    let data=await res.json();
+    try{
+        let res=await fetch('https://api.open-meteo.com/v1/forecast?latitude=48.3775&longitude=17.5883&current=temperature_2m,weather_code');
+        let data=await res.json();
 
-    w_temp.innerText=Math.round(data.current.temperature_2m)+"°C";
+        document.getElementById('w-temp').innerText=Math.round(data.current.temperature_2m)+"°C";
 
-    let c=data.current.weather_code;
-    let i="☀️";
-    if(c<=3)i="🌤️";
-    else if(c<50)i="☁️";
-    else if(c<70)i="🌧️";
-    else i="❄️";
+        let c=data.current.weather_code;
+        let i="☀️";
+        if(c<=3)i="🌤️";
+        else if(c<50)i="☁️";
+        else if(c<70)i="🌧️";
+        else i="❄️";
 
-    w_icon.innerText=i;
+        document.getElementById('w-icon').innerText=i;
+
+    }catch(e){
+        document.getElementById('w-temp').innerText="ERR";
+    }
 }
 
+/* 📅 AGENDA */
 async function updateAgenda(){
-    let res=await fetch(`https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&gid=${gid}`);
-    let txt=await res.text();
-    let json=JSON.parse(txt.substring(47).slice(0,-2));
+    try{
+        let res=await fetch(`https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&gid=${gid}`);
+        let txt=await res.text();
+        let json=JSON.parse(txt.substring(47).slice(0,-2));
 
-    let now=new Date();
-    let html="";
+        let now=new Date();
+        let html="";
 
-    json.table.rows.forEach(r=>{
-        if(!r.c)return;
+        json.table.rows.forEach(r=>{
+            if(!r.c)return;
 
-        let val=r.c[1]?.f||r.c[1]?.v||"";
+            let val=r.c[1]?.f||r.c[1]?.v||"";
 
-        let today=
-            val.includes(`Date(${now.getFullYear()},${now.getMonth()},${now.getDate()}`) ||
-            val.includes(`${now.getDate()}.${now.getMonth()+1}.${now.getFullYear()}`);
+            let today=
+                val.includes(`Date(${now.getFullYear()},${now.getMonth()},${now.getDate()}`) ||
+                val.includes(`${now.getDate()}.${now.getMonth()+1}.${now.getFullYear()}`);
 
-        if(!today)return;
+            if(!today)return;
 
-        let C=r.c[2]?.v||"";
-        let D=r.c[3]?.v||"";
+            let C=r.c[2]?.v||"";
+            let D=r.c[3]?.v||"";
 
-        html+=`⭐ ${D||C}`;
-    });
+            html+=`⭐ ${D||C}`;
+        });
 
-    document.getElementById('agenda-box').innerHTML=html;
+        document.getElementById('agenda-box').innerHTML=html;
+
+    }catch(e){
+        document.getElementById('agenda-box').innerText="❌ chyba";
+    }
 }
 
+/* 🚀 ŠTART */
 updateClock();
 updateWeather();
 updateAgenda();
