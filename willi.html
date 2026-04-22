@@ -20,15 +20,16 @@
 
         #main-container { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; margin-left: 100px; }
         #clock { font-size: 13rem; font-weight: 900; margin: 0; line-height: 0.8; letter-spacing: -5px; }
-        #date { font-size: 2.5rem; opacity: 0.9; margin-top: 20px; }
+        #date { font-size: 2.5rem; opacity: 0.9; margin-top: 20px; text-transform: capitalize; }
 
         .overlay { display: none; position: fixed; top: 0; left: 100px; right: 0; bottom: 0; background: rgba(0,0,0,0.9); backdrop-filter: blur(25px); z-index: 50; flex-direction: column; align-items: center; justify-content: center; }
         .grid { display: flex; gap: 30px; }
         .card { background: rgba(255,255,255,0.05); padding: 40px; border-radius: 30px; width: 220px; text-align: center; text-decoration: none; color: white; border: 1px solid rgba(255,255,255,0.1); }
         .card i { font-size: 5rem; margin-bottom: 15px; }
 
-        #weather-container { position: absolute; top: 20px; right: 20px; text-align: right; }
-        #weather-temp { font-size: 3rem; font-weight: bold; }
+        #weather-container { position: absolute; top: 20px; right: 20px; display: flex; align-items: center; gap: 15px; background: rgba(0,0,0,0.3); padding: 10px 20px; border-radius: 20px; }
+        #weather-temp { font-size: 2.5rem; font-weight: bold; }
+        #weather-icon { font-size: 3rem; color: #FBBC05; }
     </style>
 </head>
 <body>
@@ -45,18 +46,25 @@
             <a href="https://www.kiss.cz/" target="_blank" class="card"><i class="material-icons" style="color: #EA4335;">radio</i><h2>KISS</h2></a>
             <a href="spotify:home" class="card"><i class="material-icons" style="color: #1DB954;">play_circle_filled</i><h2>Spotify</h2></a>
         </div>
-        <button onclick="showSection('home')" style="margin-top:40px; color:white; background:none; border:1px solid #fff; padding:10px 30px; border-radius:20px;">Späť</button>
+        <button onclick="showSection('home')" style="margin-top:40px; color:white; background:none; border:1px solid #fff; padding:10px 30px; border-radius:20px; cursor:pointer;">Späť</button>
     </div>
 
     <div id="light-overlay" class="overlay">
         <div class="grid">
             <a href="https://home.google.com/" target="_blank" class="card"><i class="material-icons" style="color: #FBBC05;">tungsten</i><h2>Svetlá</h2></a>
         </div>
-        <button onclick="showSection('home')" style="margin-top:40px; color:white; background:none; border:1px solid #fff; padding:10px 30px; border-radius:20px;">Späť</button>
+        <button onclick="showSection('home')" style="margin-top:40px; color:white; background:none; border:1px solid #fff; padding:10px 30px; border-radius:20px; cursor:pointer;">Späť</button>
     </div>
 
-    <div id="weather-container"><div id="weather-temp">--°C</div></div>
-    <div id="main-container"><div id="clock">00:00</div><div id="date">...</div></div>
+    <div id="weather-container">
+        <i id="weather-icon" class="material-icons">wb_sunny</i>
+        <div id="weather-temp">--°C</div>
+    </div>
+
+    <div id="main-container">
+        <div id="clock">00:00</div>
+        <div id="date">Načítavam...</div>
+    </div>
 
     <script>
         const S_ID = '1wAMdy1V_88RKowxIeDsC8Q2ROgS8U44p2NeTfJBKyO8'; 
@@ -71,21 +79,33 @@
         }
 
         async function loadData() {
-            // Fotky
+            // FOTKY - opravené pre tablet
             try {
                 const r = await fetch(`https://docs.google.com/spreadsheets/d/${S_ID}/export?format=csv&gid=${G_ID}`);
                 const t = await r.text();
                 const ids = t.split('\n').map(row => row.split(',')[3]).filter(id => id && id.length > 20);
-                const id = ids[Math.floor(Math.random()*ids.length)].replace(/"/g, '').trim();
-                document.getElementById('bg').style.backgroundImage = `url('https://drive.google.com/thumbnail?sz=w1920&id=${id}')`;
-            } catch(e) {}
+                if(ids.length > 0) {
+                    const id = ids[Math.floor(Math.random()*ids.length)].replace(/"/g, '').trim();
+                    const imgUrl = `https://drive.google.com/thumbnail?sz=w1920&id=${id}`;
+                    const img = new Image();
+                    img.src = imgUrl;
+                    img.onload = () => { document.getElementById('bg').style.backgroundImage = `url('${imgUrl}')`; };
+                }
+            } catch(e) { console.log("Foto error"); }
             
-            // Počasie
+            // POČASIE - s ikonami
             try {
                 const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=48.37&longitude=17.58&current_weather=true`);
                 const d = await r.json();
+                const code = d.current_weather.weathercode;
                 document.getElementById('weather-temp').innerText = Math.round(d.current_weather.temperature) + '°C';
-            } catch(e) {}
+                
+                const icon = document.getElementById('weather-icon');
+                if (code <= 3) icon.innerText = 'wb_sunny';
+                else if (code <= 67) icon.innerText = 'cloudy_snowing';
+                else if (code <= 82) icon.innerText = 'umbrella';
+                else icon.innerText = 'cloud';
+            } catch(e) { console.log("Weather error"); }
         }
 
         function updateTime() {
@@ -98,6 +118,10 @@
         setInterval(loadData, 600000);
         updateTime();
         loadData();
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js');
+        }
     </script>
 </body>
 </html>
