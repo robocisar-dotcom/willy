@@ -5,16 +5,15 @@
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#000000",
-  "description": "Smart Dashboard Willy",
   "icons": [
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/553/553376.png",
+      "src": "icon_willi.png",
       "sizes": "192x192",
       "type": "image/png",
       "purpose": "any maskable"
     },
     {
-      "src": "https://cdn-icons-png.flaticon.com/512/553/553376.png",
+      "src": "icon_willi.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
