@@ -3,240 +3,133 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>WILLI - Smart Home</title>
-    
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;500;700&display=swap" rel="stylesheet">
-    
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <link rel="manifest" href="manifest.json">
+    <title>Willy Dashboard</title>
     <style>
-        :root {
-            --bg-color: #0f172a;
-            --card-bg: #1e293b;
-            --accent: #38bdf8;
-            --text-main: #f8fafc;
-            --text-dim: #94a3b8;
-            --danger: #ef4444;
-        }
-
         * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { margin: 0; background: #000; color: #fff; font-family: sans-serif; overflow: hidden; height: 100vh; }
+        
+        #bg { 
+            position: fixed; width: 100%; height: 100%; 
+            z-index: -1; filter: brightness(0.5); 
+            transition: background-image 2s ease-in-out; 
+            background-size: cover; background-position: center;
+            background-color: #111;
+        }
+        
+        .page { display: none; width: 100vw; height: 100vh; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        .active { display: flex; animation: fadeIn 0.8s; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
-        body {
-            font-family: 'Inter', sans-serif;
-            background-color: var(--bg-color);
-            color: var(--text-main);
-            margin: 0;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            min-height: 100vh;
-            padding-bottom: 40px;
+        #weather-box {
+            position: absolute; top: 30px; left: 30px; text-align: left;
+            background: rgba(0,0,0,0.4); padding: 20px; border-radius: 20px;
+            backdrop-filter: blur(10px); z-index: 10;
         }
 
-        /* --- HLAVNÁ STRÁNKA (HERO) --- */
-        .hero {
-            text-align: center;
-            padding: 60px 20px;
-            width: 100%;
+        #clock { font-size: 10rem; font-weight: 100; line-height: 1; }
+        #date-sk { font-size: 2.5rem; font-weight: 300; margin-top: 10px; }
+
+        .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; width: 80%; margin-top: 20px; }
+        .card { background: rgba(255,255,255,0.1); padding: 40px; border-radius: 20px; font-size: 1.5rem; border: 1px solid rgba(255,255,255,0.1); }
+
+        #nav { 
+            position: fixed; bottom: 0; width: 100%; display: flex; 
+            background: rgba(0,0,0,0.8); padding: 15px 0; border-top: 1px solid rgba(255,255,255,0.1);
         }
-
-        #clock {
-            font-size: clamp(4rem, 15vw, 7rem);
-            font-weight: 300;
-            letter-spacing: -2px;
-            margin: 0;
-            color: var(--text-main);
-        }
-
-        #date {
-            font-size: 1.2rem;
-            color: var(--accent);
-            text-transform: uppercase;
-            letter-spacing: 2px;
-            margin-bottom: 30px;
-        }
-
-        .radio-controls {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .btn-off {
-            background: transparent;
-            border: 1px solid var(--text-dim);
-            color: var(--text-dim);
-            padding: 8px 20px;
-            border-radius: 30px;
-            cursor: pointer;
-            font-size: 0.8rem;
-            transition: all 0.3s;
-        }
-
-        .btn-off:hover {
-            border-color: var(--danger);
-            color: var(--danger);
-        }
-
-        /* --- Mriežka s kartami --- */
-        .dashboard {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
-            gap: 20px;
-            width: 95%;
-            max-width: 1200px;
-            padding: 10px;
-        }
-
-        .card {
-            background: var(--card-bg);
-            border-radius: 24px;
-            padding: 24px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-        }
-
-        .card h2 {
-            font-size: 1.1rem;
-            margin-top: 0;
-            margin-bottom: 20px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: var(--text-dim);
-        }
-
-        /* --- Tlačidlá --- */
-        .grid-buttons {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
-
-        .btn-action {
-            background: #334155;
-            border: none;
-            color: white;
-            padding: 18px 10px;
-            border-radius: 16px;
-            font-weight: 500;
-            cursor: pointer;
-            transition: transform 0.1s, background 0.3s;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .btn-action:active {
-            transform: scale(0.95);
-            background: var(--accent);
-        }
-
-        .btn-full { grid-column: span 2; background: #0ea5e9; }
-
-        /* Status indikátor */
-        .status { font-size: 0.7rem; opacity: 0.6; }
-
+        .nav-btn { color: #888; text-align: center; flex: 1; cursor: pointer; font-size: 0.9rem; }
+        .nav-btn.active-nav { color: #fff; font-weight: bold; }
+        .nav-btn span { font-size: 1.8rem; display: block; }
     </style>
 </head>
 <body>
 
-    <section class="hero">
-        <div id="clock">00:00</div>
-        <div id="date">Načítavam...</div>
-        
-        <div class="radio-controls">
-            <div id="radio-status" class="status">Rádio vypnuté</div>
-            <button class="btn-off" onclick="stopRadio()">Vypnúť rádio ✖</button>
-        </div>
-    </section>
+<div id="bg"></div>
 
-    <main class="dashboard">
-        
-        <div class="card">
-            <h2><span>📻</span> Multimédia</h2>
-            <div class="grid-buttons">
-                <button class="btn-action" onclick="playRadio('https://stream.funradio.sk/fun128.mp3', 'Fun Rádio')">Fun Rádio</button>
-                <button class="btn-action" onclick="playRadio('https://stream.vlna.sk/vlna128.mp3', 'Rádio Vlna')">Rádio Vlna</button>
-                <button class="btn-action" onclick="playRadio('https://expres.sk/stream', 'Rádio Expres')">Expres</button>
-                <button class="btn-action" onclick="playRadio('https://icecast.kiss.cz/kiss128.mp3', 'Rádio Kiss')">Radio Kiss</button>
-                <button class="btn-action btn-full" onclick="openSpotify()">Spotify Web</button>
-            </div>
-        </div>
+<div id="weather-box">
+    <div id="w-icon" style="font-size: 3rem;">☀️</div>
+    <div id="w-temp" style="font-size: 2.5rem;">--°C</div>
+</div>
 
-        <div class="card">
-            <h2><span>💡</span> Svetlá & Zásuvky</h2>
-            <div class="grid-buttons">
-                <button class="btn-action" onclick="controlSinric('ID_SVETLO_1', 'on')">Svetlo 1</button>
-                <button class="btn-action" onclick="controlSinric('ID_SVETLO_2', 'on')">Svetlo 2</button>
-                <button class="btn-action" onclick="controlSinric('ID_ZASUVKA_1', 'on')">Zásuvka PC</button>
-                <button class="btn-action" onclick="controlSinric('ID_TAPO_1', 'on')">Tapo Lampa</button>
-            </div>
-        </div>
+<div id="p1" class="page active">
+    <div id="clock">00:00</div>
+    <div id="date-sk">Načítavam...</div>
+</div>
 
-        <div class="card">
-            <h2><span>🌿</span> Vzduch & Závlaha</h2>
-            <div class="grid-buttons">
-                <button class="btn-action btn-full" onclick="controlESP('vzduch', 'toggle')">Vzduchotechnika</button>
-                <button class="btn-action btn-full" style="background: #0369a1;" onclick="controlESP('voda', 'on')">Zaliať kvety 💧</button>
-            </div>
-            <p style="text-align: center; font-size: 0.8rem; margin-top: 15px; color: var(--text-dim);">
-                Čaká sa na definíciu cyklov...
-            </p>
-        </div>
+<div id="p2" class="page">
+    <h1>Multimédiá</h1>
+    <div class="grid">
+        <div class="card" onclick="location.reload()">🔄 Obnoviť</div>
+        <div class="card">📻 Rádio 80s</div>
+        <div class="card">🎵 Spotify</div>
+        <div class="card">📺 YouTube</div>
+    </div>
+</div>
 
-    </main>
+<div id="p3" class="page"><h1>Môj Dom</h1></div>
+<div id="p4" class="page"><h1>Ekosystém</h1></div>
 
-    <audio id="audioPlayer"></audio>
+<nav id="nav">
+    <div class="nav-btn active-nav" onclick="showPage('p1', this)"><span>🏠</span>DOMOV</div>
+    <div class="nav-btn" onclick="showPage('p2', this)"><span>🎵</span>MÉDIÁ</div>
+    <div class="nav-btn" onclick="showPage('p3', this)"><span>📱</span>DOM</div>
+    <div class="nav-btn" onclick="showPage('p4', this)"><span>🌿</span>FLÓRA</div>
+</nav>
 
-    <script>
-        // HODINY A DÁTUM
-        function updateClock() {
-            const now = new Date();
-            const h = String(now.getHours()).padStart(2, '0');
-            const m = String(now.getMinutes()).padStart(2, '0');
-            const s = String(now.getSeconds()).padStart(2, '0');
+<script>
+    const sheetId = '1wAMdy1V_88RKowxIeDsC8Q2ROgS8U44p2NeTfJBKyO8';
+
+    function showPage(pageId, btn) {
+        document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+        document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active-nav'));
+        document.getElementById(pageId).classList.add('active');
+        btn.classList.add('active-nav');
+    }
+
+    function updateClock() {
+        const now = new Date();
+        document.getElementById('clock').innerText = now.toLocaleTimeString('sk-SK', {hour:'2-digit', minute:'2-digit'});
+        document.getElementById('date-sk').innerText = now.toLocaleDateString('sk-SK', {weekday:'long', day:'numeric', month:'long'});
+    }
+
+    async function updateBackground() {
+        try {
+            // Skúsime načítať tabuľku (hárok "sekcie foto")
+            const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=sekcie%20foto`;
+            const response = await fetch(url);
+            const text = await response.text();
+            // Vyčistíme JSON dáta od balastu Google
+            const json = JSON.parse(text.substring(47).slice(0, -2));
             
-            document.getElementById('clock').innerText = `${h}:${m}`; // Bez sekúnd pre čistý dizajn, alebo pridaj ${s}
-            
-            const options = { weekday: 'long', day: 'numeric', month: 'long' };
-            document.getElementById('date').innerText = now.toLocaleDateString('sk-SK', options);
-        }
-        setInterval(updateClock, 1000);
-        updateClock();
+            // Vytiahneme ID zo stĺpca D (index 3)
+            const ids = json.table.rows
+                .map(r => (r.c && r.c[3]) ? r.c[3].v : null)
+                .filter(id => id && id.length > 10);
 
-        // RÁDIO FUNKCIE
-        const player = document.getElementById('audioPlayer');
-        const statusText = document.getElementById('radio-status');
-
-        function playRadio(url, name) {
-            player.src = url;
-            player.play();
-            statusText.innerText = `Hrá: ${name}`;
-            statusText.style.color = "#38bdf8";
+            if (ids.length > 0) {
+                const randomId = ids[Math.floor(Math.random() * ids.length)];
+                // Použijeme stabilnejší formát linku pre náhľad
+                const imgUrl = `https://drive.google.com/thumbnail?sz=w1920&id=${randomId}`;
+                
+                const bg = document.getElementById('bg');
+                const img = new Image();
+                img.src = imgUrl;
+                img.onload = () => {
+                    bg.style.backgroundImage = `url('${imgUrl}')`;
+                };
+            }
+        } catch (e) {
+            console.error("Chyba pri fotkách:", e);
         }
+    }
 
-        function stopRadio() {
-            player.pause();
-            player.src = "";
-            statusText.innerText = "Rádio vypnuté";
-            statusText.style.color = "inherit";
-        }
+    setInterval(updateClock, 1000);
+    setInterval(updateBackground, 30000); // Každých 30 sekúnd nová fotka
+    
+    updateClock();
+    updateBackground();
+</script>
 
-        function openSpotify() {
-            window.open('https://open.spotify.com', '_blank');
-        }
-
-        // SMART HOME FUNKCIE (Sinric Pro / ESP)
-        function controlSinric(deviceId, action) {
-            console.log(`Posielam príkaz pre ${deviceId}: ${action}`);
-            // Tu potom doplníme tvoj API kľúč a fetch volanie
-            alert('Príkaz odoslaný do Sinric pre: ' + deviceId);
-        }
-
-        function controlESP(system, action) {
-            console.log(`Ovládanie ${system}: ${action}`);
-            // Logika pre vzduchotechniku a vodu
-        }
-    </script>
 </body>
 </html>
