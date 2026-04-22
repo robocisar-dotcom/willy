@@ -2,194 +2,199 @@
 <html lang="sk">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 <title>Willy Dashboard</title>
 
 <style>
-* { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
-body { 
-    margin: 0; background: #000; color: #fff; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
-    overflow: hidden; height: 100vh; width: 100vw; 
+* { box-sizing: border-box; }
+
+body {
+    margin:0;
+    background:#000;
+    color:#fff;
+    font-family:'Segoe UI',sans-serif;
+    overflow:hidden;
 }
 
-#bg { 
-    position: fixed; width: 100%; height: 100%; 
-    z-index: -1; filter: brightness(0.5); 
-    background-size: cover; background-position: center;
-    background-color: #111;
+/* 🌤 POČASIE */
+#weather-box{
+    position:absolute;
+    top:20px;
+    right:20px;
+    background:rgba(0,0,0,0.5);
+    padding:15px 20px;
+    border-radius:25px;
+    text-align:center;
+    backdrop-filter:blur(10px);
 }
 
-#weather-box {
-    position: absolute; top: 20px; right: 25px; text-align: center;
-    background: rgba(0,0,0,0.4); padding: 12px 18px; border-radius: 20px;
-    backdrop-filter: blur(10px);
+#w-icon{
+    font-size:2.5rem;
 }
 
-.page { 
-    display: none; width: 100vw; height: 100vh; 
-    flex-direction: column; align-items: center; 
-    justify-content: flex-start; padding-top: 8vh; text-align: center; 
-}
-.active { display: flex; }
-
-#clock { font-size: clamp(6rem, 20vh, 14rem); font-weight: 800; }
-#date-sk { font-size: clamp(1.5rem, 4vh, 2.5rem); margin-top: 10px; }
-
-#agenda-box {
-    margin-top: 40px;
+#w-temp{
+    font-size:1.5rem;
+    font-weight:bold;
 }
 
-.agenda-item { font-size: 2rem; }
-.agenda-detail { font-size: 1.4rem; opacity: 0.7; }
-
-/* 🔥 SPODNÉ MENU */
-#nav { 
-    position: fixed; 
-    bottom: 0; 
-    left: 0; 
-    width: 100%; 
-    display: flex; 
-    justify-content: space-around;
-    padding: 15px 10px;
-    background: rgba(0,0,0,0.7);
-    backdrop-filter: blur(15px);
-    border-top: 1px solid rgba(255,255,255,0.1);
+/* 🕒 */
+#clock{
+    font-size:clamp(6rem,20vh,14rem);
+    text-align:center;
+    margin-top:80px;
 }
 
-.nav-btn { 
-    color: rgba(255,255,255,0.4); 
-    text-align: center; 
-    flex: 1; 
-    cursor: pointer; 
-    font-size: 0.8rem;
+#date-sk{
+    text-align:center;
+    font-size:2rem;
 }
 
-.nav-btn.active-nav { 
-    color: #fff; 
+/* 📅 */
+#agenda-box{
+    text-align:center;
+    margin-top:30px;
+    font-size:2rem;
 }
+
+/* 📱 NAV */
+#nav{
+    position:fixed;
+    bottom:0;
+    width:100%;
+    display:flex;
+    background:rgba(0,0,0,0.8);
+    backdrop-filter:blur(20px);
+    padding:10px 0;
+}
+
+.nav-btn{
+    flex:1;
+    text-align:center;
+    color:rgba(255,255,255,0.4);
+    font-size:0.8rem;
+}
+
+.nav-btn span{
+    display:block;
+    font-size:2rem;
+}
+
+.nav-btn.active-nav{
+    color:#fff;
+    transform:translateY(-8px);
+}
+
+/* STRÁNKY */
+.page{ display:none; }
+.active{ display:block; }
 </style>
 </head>
 
 <body>
 
-<div id="bg"></div>
-
+<!-- POČASIE -->
 <div id="weather-box">
     <div id="w-icon">--</div>
     <div id="w-temp">--°C</div>
 </div>
 
-<!-- STRÁNKY -->
+<!-- DOMOV -->
 <div id="p1" class="page active">
     <div id="clock"></div>
     <div id="date-sk"></div>
     <div id="agenda-box"></div>
 </div>
 
-<div id="p2" class="page">🎵 MÉDIÁ</div>
-<div id="p3" class="page">📱 DOM</div>
-<div id="p4" class="page">🌿 FLÓRA</div>
+<div id="p2" class="page">🎵 Médiá</div>
+<div id="p3" class="page">📱 Dom</div>
+<div id="p4" class="page">🌿 Flóra</div>
 
-<!-- 🔥 NAV -->
+<!-- MENU -->
 <nav id="nav">
-    <div class="nav-btn active-nav" onclick="showPage('p1', this)">🏠<br>DOMOV</div>
-    <div class="nav-btn" onclick="showPage('p2', this)">🎵<br>MÉDIÁ</div>
-    <div class="nav-btn" onclick="showPage('p3', this)">📱<br>DOM</div>
-    <div class="nav-btn" onclick="showPage('p4', this)">🌿<br>FLÓRA</div>
+    <div class="nav-btn active-nav" onclick="showPage('p1',this)">
+        <span>🏠</span>DOMOV
+    </div>
+    <div class="nav-btn" onclick="showPage('p2',this)">
+        <span>🎵</span>MÉDIÁ
+    </div>
+    <div class="nav-btn" onclick="showPage('p3',this)">
+        <span>📱</span>DOM
+    </div>
+    <div class="nav-btn" onclick="showPage('p4',this)">
+        <span>🌿</span>FLÓRA
+    </div>
 </nav>
 
 <script>
 
-const sheetId = '1wAMdy1V_88RKowxIeDsC8Q2ROgS8U44p2NeTfJBKyO8';
-const gidKalendar = '602623609';
+const sheetId='1wAMdy1V_88RKowxIeDsC8Q2ROgS8U44p2NeTfJBKyO8';
+const gid='602623609';
 
-function updateClock() {
-    const now = new Date();
-
-    document.getElementById('clock').innerText =
-        now.getHours().toString().padStart(2,'0') + ":" +
-        now.getMinutes().toString().padStart(2,'0');
-
-    document.getElementById('date-sk').innerText =
-        now.toLocaleDateString('sk-SK', {
-            weekday:'long',
-            day:'numeric',
-            month:'long'
-        });
+function updateClock(){
+    let now=new Date();
+    clock.innerText=now.toLocaleTimeString('sk-SK',{hour:'2-digit',minute:'2-digit'});
+    document.getElementById('date-sk').innerText=
+        now.toLocaleDateString('sk-SK',{weekday:'long',day:'numeric',month:'long'});
 }
 
-/* 🔥 PREPÍNANIE STRÁNOK */
-function showPage(id, btn) {
-    document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active-nav'));
-    document.getElementById(id).style.display = 'flex';
+function showPage(id,btn){
+    document.querySelectorAll('.page').forEach(p=>p.style.display='none');
+    document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active-nav'));
+    document.getElementById(id).style.display='block';
     btn.classList.add('active-nav');
 }
 
-async function updateWeather() {
-    try {
-        const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=48.3775&longitude=17.5883&current=temperature_2m,weather_code');
-        const data = await res.json();
+async function updateWeather(){
+    let res=await fetch('https://api.open-meteo.com/v1/forecast?latitude=48.3775&longitude=17.5883&current=temperature_2m,weather_code');
+    let data=await res.json();
 
-        document.getElementById('w-temp').innerText =
-            Math.round(data.current.temperature_2m) + "°C";
+    w-temp.innerText=Math.round(data.current.temperature_2m)+"°C";
 
-        let code = data.current.weather_code;
-        let icon = "☀️";
+    let c=data.current.weather_code;
+    let i="☀️";
+    if(c<=3)i="🌤️";
+    else if(c<50)i="☁️";
+    else if(c<70)i="🌧️";
+    else i="❄️";
 
-        if (code <= 3) icon = "🌤️";
-        else if (code < 50) icon = "☁️";
-        else if (code < 70) icon = "🌧️";
-        else icon = "❄️";
-
-        document.getElementById('w-icon').innerText = icon;
-
-    } catch (e) {
-        document.getElementById('w-temp').innerText = "ERR";
-    }
+    w-icon.innerText=i;
 }
 
-async function updateAgenda() {
-    try {
-        const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&gid=${gidKalendar}`;
-        const res = await fetch(url);
-        const text = await res.text();
-        const json = JSON.parse(text.substring(47).slice(0, -2));
+async function updateAgenda(){
+    let res=await fetch(`https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&gid=${gid}`);
+    let txt=await res.text();
+    let json=JSON.parse(txt.substring(47).slice(0,-2));
 
-        const now = new Date();
-        let html = "";
+    let now=new Date();
+    let html="";
 
-        json.table.rows.forEach(row => {
-            if (!row.c) return;
+    json.table.rows.forEach(r=>{
+        if(!r.c)return;
 
-            let val = row.c[1]?.f || row.c[1]?.v || "";
+        let val=r.c[1]?.f||r.c[1]?.v||"";
 
-            let isToday =
-                val.includes(`Date(${now.getFullYear()},${now.getMonth()},${now.getDate()}`) ||
-                val.includes(`${now.getDate()}.${now.getMonth()+1}.${now.getFullYear()}`);
+        let today=
+            val.includes(`Date(${now.getFullYear()},${now.getMonth()},${now.getDate()}`) ||
+            val.includes(`${now.getDate()}.${now.getMonth()+1}.${now.getFullYear()}`);
 
-            if (!isToday) return;
+        if(!today)return;
 
-            let C = row.c[2]?.v || "";
-            let D = row.c[3]?.v || "";
+        let C=r.c[2]?.v||"";
+        let D=r.c[3]?.v||"";
 
-            html += `<div class="agenda-item">⭐ ${D || C}</div>`;
-        });
+        html+=`⭐ ${D||C}`;
+    });
 
-        document.getElementById('agenda-box').innerHTML = html;
-
-    } catch (e) {
-        document.getElementById('agenda-box').innerText = "❌ chyba";
-    }
+    agenda-box.innerHTML=html;
 }
 
 updateClock();
 updateWeather();
 updateAgenda();
 
-setInterval(updateClock, 1000);
-setInterval(updateWeather, 600000);
-setInterval(updateAgenda, 60000);
+setInterval(updateClock,1000);
+setInterval(updateWeather,600000);
+setInterval(updateAgenda,60000);
 
 </script>
 
