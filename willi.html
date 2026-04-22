@@ -2,187 +2,219 @@
 <html lang="sk">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Willy Dashboard</title>
 
 <style>
-* { box-sizing: border-box; }
+* {
+    box-sizing: border-box;
+    -webkit-tap-highlight-color: transparent;
+}
 
 body {
-    margin:0;
-    background:#000;
-    color:#fff;
-    font-family:'Segoe UI',sans-serif;
-    overflow:hidden;
+    margin: 0;
+    background: #000;
+    color: #fff;
+    font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    overflow: hidden;
+    width: 100vw;
+    height: 100vh;
 }
 
-/* 🌤 POČASIE */
-#weather-box{
-    position:absolute;
-    top:20px;
-    right:20px;
-    background:rgba(0,0,0,0.6);
-    padding:30px 40px;
-    border-radius:35px;
-    text-align:center;
-    backdrop-filter:blur(20px);
+/* POZADIE */
+#bg {
+    position: fixed;
+    inset: 0;
+    z-index: -1;
+    background: #111;
+    background-size: cover;
+    background-position: center;
+    filter: brightness(0.5);
 }
 
-#w-icon{
-    font-size:7rem;
-    line-height:1;
+/* POČASIE */
+#weather-box {
+    position: absolute;
+    top: 20px;
+    right: 20px;
+    background: rgba(0,0,0,0.6);
+    padding: 30px 40px;
+    border-radius: 35px;
+    text-align: center;
+    backdrop-filter: blur(20px);
+    z-index: 10;
 }
 
-#w-temp{
-    font-size:4rem;
-    font-weight:900;
-    margin-top:10px;
+#w-icon {
+    font-size: 7rem;
+    line-height: 1;
 }
 
-/* 🕒 */
-#clock{
-    font-size:clamp(6rem,20vh,14rem);
-    text-align:center;
-    margin-top:80px;
-    font-weight:800;
-}
-
-#date-sk{
-    text-align:center;
-    font-size:2rem;
-}
-
-/* 📅 */
-#agenda-box{
-    text-align:center;
-    margin-top:30px;
-    font-size:2rem;
-    padding:0 20px;
-}
-
-/* 📱 NAV */
-#nav{
-    position:fixed;
-    bottom:0;
-    width:100%;
-    display:flex;
-    background:rgba(0,0,0,0.8);
-    backdrop-filter:blur(20px);
-    padding:15px 0 calc(15px + env(safe-area-inset-bottom));
-    z-index:100;
-}
-
-.nav-btn{
-    flex:1;
-    text-align:center;
-    color:rgba(255,255,255,0.4);
-    font-size:1rem;
-    cursor:pointer;
-}
-
-.nav-btn span{
-    display:block;
-    font-size:3rem;
-    margin-bottom:5px;
-}
-
-.nav-btn.active-nav{
-    color:#fff;
-    transform:translateY(-10px);
+#w-temp {
+    font-size: 4rem;
+    font-weight: 900;
+    margin-top: 10px;
 }
 
 /* STRÁNKY */
-.page{
-    display:none;
-    width:100vw;
-    height:100vh;
-    padding-top:8vh;
-    text-align:center;
+.page {
+    display: none;
+    width: 100vw;
+    height: 100vh;
+    padding-top: 8vh;
+    text-align: center;
 }
 
-.active{
-    display:block;
+.page.active {
+    display: block;
 }
 
-/* 🎵 MÉDIÁ */
-.media-wrap{
-    width:100%;
-    max-width:900px;
-    margin:0 auto;
-    padding:30px 20px 140px;
+/* DOMOV */
+#clock {
+    font-size: clamp(6rem, 20vh, 14rem);
+    text-align: center;
+    margin-top: 80px;
+    font-weight: 800;
+    line-height: 0.9;
 }
 
-.media-title{
-    font-size:2.5rem;
-    font-weight:800;
-    margin-bottom:25px;
+#date-sk {
+    text-align: center;
+    font-size: 2rem;
+    margin-top: 10px;
 }
 
-.media-grid{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:20px;
+#agenda-box {
+    text-align: center;
+    margin-top: 30px;
+    font-size: 2rem;
+    padding: 0 20px;
 }
 
-.media-card{
-    background:rgba(255,255,255,0.08);
-    border:1px solid rgba(255,255,255,0.1);
-    border-radius:25px;
-    padding:35px 20px;
-    font-size:1.8rem;
-    font-weight:700;
-    cursor:pointer;
-    backdrop-filter:blur(10px);
-    transition:0.2s;
+/* MÉDIÁ */
+.media-wrap {
+    width: 100%;
+    max-width: 980px;
+    margin: 0 auto;
+    padding: 40px 20px 150px;
 }
 
-.media-card:active{
-    transform:scale(0.98);
-    background:rgba(255,255,255,0.16);
+.media-title {
+    font-size: 3rem;
+    font-weight: 800;
+    margin-bottom: 30px;
 }
 
-.stop-btn{
-    margin-top:25px;
-    background:rgba(255,60,60,0.18);
-    border:1px solid rgba(255,90,90,0.8);
-    color:#fff;
-    border-radius:25px;
-    padding:22px 20px;
-    width:100%;
-    font-size:1.6rem;
-    font-weight:800;
-    cursor:pointer;
+.media-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+    width: 100%;
 }
 
-#now-playing{
-    margin-top:20px;
-    font-size:1.2rem;
-    opacity:0.8;
+.media-card {
+    background: rgba(255,255,255,0.08);
+    border: 1px solid rgba(255,255,255,0.12);
+    border-radius: 25px;
+    padding: 35px 20px;
+    font-size: 1.8rem;
+    font-weight: 700;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+    transition: 0.2s;
 }
 
-.simple-page{
-    padding-top:120px;
-    font-size:2rem;
+.media-card:active {
+    transform: scale(0.98);
+    background: rgba(255,255,255,0.18);
 }
 
-@media (max-width: 700px){
-    .media-grid{
-        grid-template-columns:1fr;
+.stop-btn {
+    margin-top: 25px;
+    background: rgba(255,60,60,0.18);
+    border: 1px solid rgba(255,90,90,0.8);
+    color: #fff;
+    border-radius: 25px;
+    padding: 22px 20px;
+    width: 100%;
+    font-size: 1.6rem;
+    font-weight: 800;
+    cursor: pointer;
+}
+
+#now-playing {
+    margin-top: 18px;
+    font-size: 1.2rem;
+    opacity: 0.85;
+}
+
+/* OSTATNÉ STRÁNKY */
+.simple-page {
+    padding-top: 120px;
+    font-size: 2.5rem;
+}
+
+/* MENU */
+#nav {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    width: 100%;
+    display: flex;
+    background: rgba(0,0,0,0.8);
+    backdrop-filter: blur(20px);
+    padding: 15px 0 calc(15px + env(safe-area-inset-bottom));
+    z-index: 100;
+}
+
+.nav-btn {
+    flex: 1;
+    text-align: center;
+    color: rgba(255,255,255,0.4);
+    font-size: 1rem;
+    cursor: pointer;
+    user-select: none;
+}
+
+.nav-btn span {
+    display: block;
+    font-size: 3rem;
+    margin-bottom: 5px;
+}
+
+.nav-btn.active-nav {
+    color: #fff;
+    transform: translateY(-10px);
+}
+
+@media (max-width: 700px) {
+    .media-grid {
+        grid-template-columns: 1fr;
     }
 
-    .media-card{
-        font-size:1.5rem;
-        padding:28px 16px;
+    .media-card {
+        font-size: 1.5rem;
+        padding: 28px 16px;
     }
 
-    .media-title{
-        font-size:2rem;
+    .media-title {
+        font-size: 2.2rem;
+    }
+
+    #w-icon {
+        font-size: 5rem;
+    }
+
+    #w-temp {
+        font-size: 3rem;
     }
 }
 </style>
 </head>
 
 <body>
+
+<div id="bg"></div>
 
 <!-- POČASIE -->
 <div id="weather-box">
@@ -215,26 +247,28 @@ body {
     </div>
 </div>
 
+<!-- DOM -->
 <div id="p3" class="page">
     <div class="simple-page">📱 Dom</div>
 </div>
 
+<!-- FLÓRA -->
 <div id="p4" class="page">
     <div class="simple-page">🌿 Flóra</div>
 </div>
 
 <!-- MENU -->
 <nav id="nav">
-    <div class="nav-btn active-nav" onclick="showPage('p1',this)">
+    <div class="nav-btn active-nav" onclick="showPage('p1', this)">
         <span>🏠</span>DOMOV
     </div>
-    <div class="nav-btn" onclick="showPage('p2',this)">
+    <div class="nav-btn" onclick="showPage('p2', this)">
         <span>🎵</span>MÉDIÁ
     </div>
-    <div class="nav-btn" onclick="showPage('p3',this)">
+    <div class="nav-btn" onclick="showPage('p3', this)">
         <span>📱</span>DOM
     </div>
-    <div class="nav-btn" onclick="showPage('p4',this)">
+    <div class="nav-btn" onclick="showPage('p4', this)">
         <span>🌿</span>FLÓRA
     </div>
 </nav>
@@ -246,30 +280,31 @@ const sheetId = '1wAMdy1V_88RKowxIeDsC8Q2ROgS8U44p2NeTfJBKyO8';
 const gid = '602623609';
 const audioPlayer = document.getElementById('audioPlayer');
 
-function updateClock(){
+function updateClock() {
     const now = new Date();
 
     document.getElementById('clock').innerText =
-        now.getHours().toString().padStart(2,'0') + ":" +
-        now.getMinutes().toString().padStart(2,'0');
+        now.getHours().toString().padStart(2, '0') + ":" +
+        now.getMinutes().toString().padStart(2, '0');
 
     document.getElementById('date-sk').innerText =
-        now.toLocaleDateString('sk-SK',{
-            weekday:'long',
-            day:'numeric',
-            month:'long'
+        now.toLocaleDateString('sk-SK', {
+            weekday: 'long',
+            day: 'numeric',
+            month: 'long'
         });
 }
 
-function showPage(id,btn){
-    document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
+function showPage(id, btn) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active-nav'));
-    document.getElementById(id).style.display = 'block';
+
+    document.getElementById(id).classList.add('active');
     btn.classList.add('active-nav');
 }
 
-async function updateWeather(){
-    try{
+async function updateWeather() {
+    try {
         const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=48.3775&longitude=17.5883&current=temperature_2m,weather_code');
         const data = await res.json();
 
@@ -283,17 +318,16 @@ async function updateWeather(){
         else i = "❄️";
 
         document.getElementById('w-icon').innerText = i;
-
-    } catch(e){
+    } catch (e) {
         document.getElementById('w-temp').innerText = "ERR";
     }
 }
 
-async function updateAgenda(){
-    try{
+async function updateAgenda() {
+    try {
         const res = await fetch(`https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&gid=${gid}`);
         const txt = await res.text();
-        const json = JSON.parse(txt.substring(47).slice(0,-2));
+        const json = JSON.parse(txt.substring(47).slice(0, -2));
 
         const now = new Date();
         let html = "";
@@ -301,11 +335,11 @@ async function updateAgenda(){
         json.table.rows.forEach(r => {
             if (!r.c) return;
 
-            const val = r.c[1]?.f || r.c[1]?.v || "";
+            const val = String(r.c[1]?.f || r.c[1]?.v || "");
 
             const today =
-                String(val).includes(`Date(${now.getFullYear()},${now.getMonth()},${now.getDate()}`) ||
-                String(val).includes(`${now.getDate()}.${now.getMonth()+1}.${now.getFullYear()}`);
+                val.includes(`Date(${now.getFullYear()},${now.getMonth()},${now.getDate()}`) ||
+                val.includes(`${now.getDate()}.${now.getMonth()+1}.${now.getFullYear()}`);
 
             if (!today) return;
 
@@ -316,23 +350,22 @@ async function updateAgenda(){
         });
 
         document.getElementById('agenda-box').innerHTML = html;
-
-    } catch(e){
+    } catch (e) {
         document.getElementById('agenda-box').innerText = "❌ chyba";
     }
 }
 
-async function playRadio(url, name){
-    try{
+async function playRadio(url, name) {
+    try {
         audioPlayer.src = url;
         await audioPlayer.play();
         document.getElementById('now-playing').innerText = `Hrá: ${name}`;
-    } catch(e){
+    } catch (e) {
         document.getElementById('now-playing').innerText = 'Prehrávanie sa nepodarilo spustiť';
     }
 }
 
-function stopRadio(){
+function stopRadio() {
     audioPlayer.pause();
     audioPlayer.src = "";
     document.getElementById('now-playing').innerText = 'Neprehráva sa nič';
@@ -342,9 +375,9 @@ updateClock();
 updateWeather();
 updateAgenda();
 
-setInterval(updateClock,1000);
-setInterval(updateWeather,600000);
-setInterval(updateAgenda,60000);
+setInterval(updateClock, 1000);
+setInterval(updateWeather, 600000);
+setInterval(updateAgenda, 60000);
 </script>
 
 </body>
