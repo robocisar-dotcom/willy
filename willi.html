@@ -200,7 +200,7 @@ async function updateAgenda(){
             let C=r.c[2]?.v||"";
             let D=r.c[3]?.v||"";
 
-            html+=`⭐ ${D||C}`;
+           html+=`${D||C}`;
         });
 
         document.getElementById('agenda-box').innerHTML=html;
