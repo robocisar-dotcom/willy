@@ -1,39 +1,45 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
     <meta charset="UTF-8">
-    <title>Willy</title>
+    <title>Willy Dashboard</title>
     <style>
         body { margin: 0; background: #000; color: #fff; font-family: sans-serif; overflow: hidden; }
         #bg { position: fixed; width: 100%; height: 100%; z-index: -1; background-size: cover; background-position: center; transition: 2s; }
-        #container { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; }
-        #clock { font-size: 8rem; }
+        #clock { font-size: 10rem; text-align: center; margin-top: 20vh; font-weight: 100; }
     </style>
 </head>
 <body>
     <div id="bg"></div>
-    <div id="container">
-        <div id="clock">00:00</div>
-    </div>
+    <div id="clock">00:00</div>
+
     <script>
-        // Tvoje presné ID tabuľky
-        const id = '1vTC382du3NGc6b_DugnxS1y3-p-Yt1iBJ63cmkTIEIp8';
-        
-        async function run() {
-            // CSV export - najspoľahlivejší spôsob
-            const r = await fetch(`https://docs.google.com/spreadsheets/d/${id}/export?format=csv`);
-            const txt = await r.text();
-            const rows = txt.split('\n');
-            const ids = rows.map(r => r.split(',')[3]).filter(i => i && i.length > 10);
-            
-            if (ids.length > 0) {
-                const imgId = ids[Math.floor(Math.random() * ids.length)].replace(/"/g, '').trim();
-                document.getElementById('bg').style.backgroundImage = `url('https://drive.google.com/thumbnail?sz=w1920&id=${imgId}')`;
+        // Tvoje ID tabuľky z foto 17
+        const spreadsheetId = '1vTC382du3NGc6b_DugnxS1y3-p-Yt1iBJ63cmkTIEIp8';
+
+        async function update() {
+            try {
+                // Použijeme najjednoduchší CSV formát, ten Google 404 nedáva
+                const response = await fetch(`https://docs.google.com/spreadsheets/d/${spreadsheetId}/export?format=csv`);
+                const data = await response.text();
+                
+                // Rozbijeme tabuľku na riadky a vezmeme stĺpec D
+                const rows = data.split('\n');
+                const images = rows.map(r => r.split(',')[3]).filter(id => id && id.length > 20);
+
+                if (images.length > 0) {
+                    const randomId = images[Math.floor(Math.random() * images.length)].replace(/"/g, '').trim();
+                    const url = `https://drive.google.com/thumbnail?sz=w1920&id=${randomId}`;
+                    document.getElementById('bg').style.backgroundImage = `url('${url}')`;
+                }
+            } catch (e) {
+                console.log("Chyba načítania");
             }
-            document.getElementById('clock').innerText = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            document.getElementById('clock').innerText = new Date().toLocaleTimeString('sk-SK', {hour:'2-digit', minute:'2-digit'});
         }
-        setInterval(run, 30000);
-        run();
+
+        setInterval(update, 60000);
+        update();
     </script>
 </body>
 </html>
