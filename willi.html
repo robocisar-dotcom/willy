@@ -6,28 +6,44 @@
     <title>Willy Dashboard Pro</title>
     <style>
         body { margin: 0; background: #000; color: #fff; font-family: sans-serif; overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
+        
+        /* POZADIE */
         #bg { position: fixed; width: 100%; height: 100%; z-index: -1; 
               background-size: cover; background-position: center center; 
               transition: 1s ease-in-out; filter: brightness(0.6); background-color: #111; }
-        #main-container { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-        #clock { font-size: 8rem; font-weight: 100; margin: 0; line-height: 1; }
-        #date { font-size: 2rem; opacity: 0.8; margin-top: 10px; }
-        #weather-container { display: flex; align-items: center; justify-content: center; margin-top: 15px; font-size: 2rem; }
-        #weather-icon { width: 60px; height: 60px; }
         
-        /* Tlačidlá */
-        .btn-nav { position: absolute; top: 50%; padding: 20px; background: rgba(255,255,255,0.1); color: white; border: none; cursor: pointer; font-size: 2rem; border-radius: 10px; }
-        #btn-prev { left: 20px; }
-        #btn-next { right: 20px; }
+        /* POČASIE V PRAVOM HORNOM ROHU */
+        #weather-container { position: absolute; top: 20px; right: 20px; display: flex; flex-direction: column; align-items: center; text-align: right; background: rgba(0,0,0,0.3); padding: 15px; border-radius: 15px; backdrop-filter: blur(5px); }
+        #weather-icon { width: 70px; height: 70px; }
+        #weather-temp { font-size: 2.2rem; font-weight: bold; }
+        #weather-feels { font-size: 1.1rem; opacity: 0.8; }
 
-        #nav-bar { position: fixed; bottom: 0; width: 100%; height: 80px; display: flex; background: rgba(0,0,0,0.7); backdrop-filter: blur(10px); }
-        .nav-item { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; font-weight: bold; opacity: 0.4; }
-        .nav-item.active { opacity: 1; background: rgba(255,255,255,0.1); border-top: 3px solid #fff; }
+        /* HLAVNÝ KONTAJNER S HODINAMI */
+        #main-container { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
+        #clock { font-size: 10rem; font-weight: 900; margin: 0; line-height: 0.9; letter-spacing: -2px; }
+        #date { font-size: 2.2rem; opacity: 0.9; margin-top: 15px; font-weight: 300; }
+        
+        /* TLAČIDLÁ PREPÍNANIA */
+        .btn-nav { position: absolute; top: 50%; transform: translateY(-50%); padding: 30px 15px; background: rgba(255,255,255,0.05); color: white; border: none; cursor: pointer; font-size: 2.5rem; border-radius: 10px; transition: 0.3s; z-index: 10; }
+        .btn-nav:hover { background: rgba(255,255,255,0.2); }
+        #btn-prev { left: 10px; }
+        #btn-next { right: 10px; }
+
+        /* DOLNÁ LIŠTA */
+        #nav-bar { position: fixed; bottom: 0; width: 100%; height: 80px; display: flex; background: rgba(0,0,0,0.8); backdrop-filter: blur(15px); border-top: 1px solid rgba(255,255,255,0.1); }
+        .nav-item { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 1rem; font-weight: bold; opacity: 0.4; text-transform: uppercase; letter-spacing: 1px; }
+        .nav-item.active { opacity: 1; border-top: 4px solid #fff; background: rgba(255,255,255,0.1); }
     </style>
 </head>
 <body>
 
     <div id="bg"></div>
+
+    <div id="weather-container">
+        <img id="weather-icon" src="" style="display:none;">
+        <div id="weather-temp">--°C</div>
+        <div id="weather-feels">Pocitovo --°C</div>
+    </div>
 
     <button id="btn-prev" class="btn-nav" onclick="changePhoto(-1)">❮</button>
     <button id="btn-next" class="btn-nav" onclick="changePhoto(1)">❯</button>
@@ -35,16 +51,12 @@
     <div id="main-container">
         <div id="clock">00:00</div>
         <div id="date">Načítavam...</div>
-        <div id="weather-container">
-            <img id="weather-icon" src="" style="display:none;">
-            <span id="weather-temp"></span>
-        </div>
     </div>
 
     <nav id="nav-bar">
         <div class="nav-item active">DOMOV</div>
         <div class="nav-item">MÉDIÁ</div>
-        <div class="nav-item">DOM</div>
+        <div class="nav-item">OSVETLENIE</div>
         <div class="nav-item">FLÓRA</div>
     </nav>
 
@@ -61,7 +73,7 @@
                 const text = await response.text();
                 allPhotoIds = text.split('\n').map(r => r.split(',')[3]).filter(id => id && id.length > 20).map(id => id.replace(/"/g, '').trim());
                 if(allPhotoIds.length > 0) showPhoto(0);
-            } catch (e) { console.error(e); }
+            } catch (e) { console.error("Chyba tabuľky:", e); }
         }
 
         function showPhoto(index) {
@@ -77,11 +89,27 @@
 
         async function updateWeather() {
             try {
-                const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=48.37&longitude=17.58&current_weather=true`);
+                // Súradnice Trnava, pridaná apparent_temperature
+                const res = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=48.37&longitude=17.58&current_weather=true&hourly=apparent_temperature`);
                 const data = await res.json();
-                document.getElementById('weather-temp').innerText = Math.round(data.current_weather.temperature) + '°C';
-                document.getElementById('weather-icon').style.display = 'block';
-            } catch(e) {}
+                
+                const temp = Math.round(data.current_weather.temperature);
+                const feels = Math.round(data.hourly.apparent_temperature[0]);
+                const code = data.current_weather.weathercode;
+                
+                let icon = '01d'; 
+                if (code >= 1 && code <= 3) icon = '02d';
+                else if (code >= 45 && code <= 48) icon = '50d';
+                else if (code >= 51 && code <= 67) icon = '09d';
+                else if (code >= 80) icon = '10d';
+
+                const img = document.getElementById('weather-icon');
+                img.src = `https://openweathermap.org/img/wn/${icon}@2x.png`;
+                img.style.display = 'block';
+                
+                document.getElementById('weather-temp').innerText = temp + '°C';
+                document.getElementById('weather-feels').innerText = `Pocitovo ${feels}°C`;
+            } catch(e) { console.error("Chyba počasia:", e); }
         }
 
         function updateTime() {
@@ -91,6 +119,8 @@
         }
 
         setInterval(updateTime, 1000);
+        setInterval(updateWeather, 900000); // Každých 15 min.
+        
         loadPhotoList();
         updateWeather();
         updateTime();
