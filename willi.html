@@ -1,36 +1,78 @@
-
 <!DOCTYPE html>
-<html lang="en">
+<html lang="sk">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Willy Dashboard</title>
+    <title>Willy Dashboard Pro</title>
     <style>
-        body { margin: 0; background: #000; color: #fff; font-family: sans-serif; overflow: hidden; height: 100vh; }
-        #bg { position: fixed; width: 100%; height: 100%; z-index: -1; background-size: cover; background-position: center; transition: 2s; filter: brightness(0.6); background-color: #111; }
-        #container { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; text-align: center; }
+        /* ZÁKLADNÉ NASTAVENIA */
+        body { margin: 0; background: #000; color: #fff; font-family: sans-serif; overflow: hidden; height: 100vh; display: flex; flex-direction: column; }
+        
+        /* POZADIE (FOTKA) - Vycentrovaná na stred */
+        #bg { position: fixed; width: 100%; height: 100%; z-index: -1; 
+              background-size: cover; background-position: center center; background-repeat: no-repeat;
+              transition: 2s; filter: brightness(0.6); background-color: #111; }
+        
+        /* HLAVNÝ KONTAJNER (HODINY + POČASIE) */
+        #main-container { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding-bottom: 80px; }
         #clock { font-size: 10rem; font-weight: 100; margin: 0; }
-        #date { font-size: 2.5rem; opacity: 0.8; margin-top: 10px; }
+        #date { font-size: 2.2rem; opacity: 0.8; margin-top: 10px; }
+        
+        /* SEKCIA POČASIA */
+        #weather-container { display: flex; align-items: center; margin-top: 20px; font-size: 2rem; }
+        #weather-icon { width: 64px; height: 64px; margin-right: 15px; }
+
+        /* DOLNÉ LIŠTY (Navigácia) */
+        #nav-bar { position: fixed; bottom: 0; width: 100%; height: 80px; display: flex; background: rgba(0,0,0,0.6); border-top: 1px solid rgba(255,255,255,0.1); }
+        .nav-item { flex: 1; display: flex; align-items: center; justify-content: center; font-size: 1.2rem; font-weight: bold; opacity: 0.5; text-transform: uppercase; letter-spacing: 2px; }
+        .nav-item.active { opacity: 1; background: rgba(255,255,255,0.1); }
     </style>
 </head>
 <body>
+
     <div id="bg"></div>
-    <div id="container">
+
+    <div id="main-container">
         <div id="clock">00:00</div>
         <div id="date">Načítavam...</div>
+        
+        <div id="weather-container">
+            <img id="weather-icon" src="" alt="">
+            <span id="weather-temp"></span>
+        </div>
     </div>
 
+    <nav id="nav-bar">
+        <div class="nav-item active">DOMOV</div>
+        <div class="nav-item">MÉDIÁ</div>
+        <div class="nav-item">DOM</div>
+        <div class="nav-item">FLÓRA</div>
+    </nav>
+
     <script>
-        // Tvoje nové ID a GID (sekcia foto)
-        const S_ID = '1wAMdy1V_88RKowxIeDsC8Q2ROgS8U44p2NeTfJBKyO8';
+        // *** DÔLEŽITÉ: NASTAVENIA ***
+        
+        // 1. VLOŽ SEM SVOJE ID TABUĽKY (z tvojho linku)
+        const S_ID = '1wAMdy1V_88RKowxIeDsC8Q2ROgS8U44p2NeTfJBKyO8'; 
+        
+        // GID pre sekciu foto
         const G_ID = '230699175';
 
+        // 2. NASTAVENIE MESTA PRE POČASIE (zadaj svoje mesto po anglicky)
+        const MESTO = 'Trnava';
+        
+        // 3. NASTAVENIE OBNOVY FOTKY (v milisekundách, 60000 = 1 minúta)
+        const CAS_OBNOVY_FOTKY = 120000; 
+
+
+        // --- FUNKCIA PRE ČAS A DÁTUM ---
         function updateTime() {
             const now = new Date();
             document.getElementById('clock').innerText = now.toLocaleTimeString('sk-SK', {hour: '2-digit', minute: '2-digit'});
             document.getElementById('date').innerText = now.toLocaleDateString('sk-SK', {weekday: 'long', day: 'numeric', month: 'long'});
         }
 
+        // --- FUNKCIA PRE NAČÍTANIE FOTKY ---
         async function updatePhoto() {
             try {
                 const url = `https://docs.google.com/spreadsheets/d/${S_ID}/export?format=csv&gid=${G_ID}`;
@@ -47,21 +89,47 @@
                     const randomId = photoIds[Math.floor(Math.random() * photoIds.length)];
                     const imgUrl = `https://drive.google.com/thumbnail?sz=w1920&id=${randomId}`;
                     const bg = document.getElementById('bg');
+                    
+                    // Pre-loading obrázka aby to nesekalo
                     const tempImg = new Image();
                     tempImg.src = imgUrl;
                     tempImg.onload = () => {
                         bg.style.backgroundImage = `url('${imgUrl}')`;
                     };
                 }
-            } catch (err) {
-                console.error("Chyba:", err);
-            }
+            } catch (err) { console.error("Chyba fotky:", err); }
         }
 
+        // --- FUNKCIA PRE POČASIE (Používa verejné API, nepotrebuješ kľúč) ---
+        async function updateWeather() {
+            try {
+                const url = `https://api.open-meteo.com/v1/forecast?latitude=48.37&longitude=17.58&current_weather=true`;
+                const response = await fetch(url);
+                const data = await response.getJson();
+                const current = data.current_weather;
+                
+                // Premeníme kód počasia na ikonku (zjednodušené)
+                let iconCode = '';
+                if(current.weathercode === 0) iconCode = '01d'; // jasno
+                else if(current.weathercode <= 3) iconCode = '02d'; // oblačno
+                else if(current.weathercode <= 67) iconCode = '09d'; // dážď
+                else iconCode = '04d'; // zamračené
+
+                document.getElementById('weather-icon').src = `https://openweathermap.org/img/wn/${iconCode}@2x.png`;
+                document.getElementById('weather-temp').innerText = `${Math.round(current.temperature)}°C`;
+            
+            } catch (err) { console.error("Chyba počasia:", err); }
+        }
+
+        // --- SPUSTENIE A INTERVALY ---
         setInterval(updateTime, 1000);
-        setInterval(updatePhoto, 60000);
+        setInterval(updatePhoto, CAS_OBNOVY_FOTKY);
+        setInterval(updateWeather, 600000); // Počasie sa obnovuje každých 10 minút
+
         updateTime();
         updatePhoto();
+        updateWeather(); // Prvé načítanie počasia
+
     </script>
 </body>
 </html>
