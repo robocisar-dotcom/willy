@@ -29,12 +29,12 @@ body {
 }
 
 #w-icon{
-    font-size:7rem; /* 🔥 veľké jak hodiny */
+    font-size:7rem;
     line-height:1;
 }
 
 #w-temp{
-    font-size:4rem; /* 🔥 obrovské */
+    font-size:4rem;
     font-weight:900;
     margin-top:10px;
 }
@@ -44,6 +44,7 @@ body {
     font-size:clamp(6rem,20vh,14rem);
     text-align:center;
     margin-top:80px;
+    font-weight:800;
 }
 
 #date-sk{
@@ -56,6 +57,7 @@ body {
     text-align:center;
     margin-top:30px;
     font-size:2rem;
+    padding:0 20px;
 }
 
 /* 📱 NAV */
@@ -66,7 +68,8 @@ body {
     display:flex;
     background:rgba(0,0,0,0.8);
     backdrop-filter:blur(20px);
-    padding:15px 0;
+    padding:15px 0 calc(15px + env(safe-area-inset-bottom));
+    z-index:100;
 }
 
 .nav-btn{
@@ -74,6 +77,7 @@ body {
     text-align:center;
     color:rgba(255,255,255,0.4);
     font-size:1rem;
+    cursor:pointer;
 }
 
 .nav-btn span{
@@ -87,8 +91,94 @@ body {
     transform:translateY(-10px);
 }
 
-.page{ display:none; }
-.active{ display:block; }
+/* STRÁNKY */
+.page{
+    display:none;
+    width:100vw;
+    height:100vh;
+    padding-top:8vh;
+    text-align:center;
+}
+
+.active{
+    display:block;
+}
+
+/* 🎵 MÉDIÁ */
+.media-wrap{
+    width:100%;
+    max-width:900px;
+    margin:0 auto;
+    padding:30px 20px 140px;
+}
+
+.media-title{
+    font-size:2.5rem;
+    font-weight:800;
+    margin-bottom:25px;
+}
+
+.media-grid{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:20px;
+}
+
+.media-card{
+    background:rgba(255,255,255,0.08);
+    border:1px solid rgba(255,255,255,0.1);
+    border-radius:25px;
+    padding:35px 20px;
+    font-size:1.8rem;
+    font-weight:700;
+    cursor:pointer;
+    backdrop-filter:blur(10px);
+    transition:0.2s;
+}
+
+.media-card:active{
+    transform:scale(0.98);
+    background:rgba(255,255,255,0.16);
+}
+
+.stop-btn{
+    margin-top:25px;
+    background:rgba(255,60,60,0.18);
+    border:1px solid rgba(255,90,90,0.8);
+    color:#fff;
+    border-radius:25px;
+    padding:22px 20px;
+    width:100%;
+    font-size:1.6rem;
+    font-weight:800;
+    cursor:pointer;
+}
+
+#now-playing{
+    margin-top:20px;
+    font-size:1.2rem;
+    opacity:0.8;
+}
+
+.simple-page{
+    padding-top:120px;
+    font-size:2rem;
+}
+
+@media (max-width: 700px){
+    .media-grid{
+        grid-template-columns:1fr;
+    }
+
+    .media-card{
+        font-size:1.5rem;
+        padding:28px 16px;
+    }
+
+    .media-title{
+        font-size:2rem;
+    }
+}
 </style>
 </head>
 
@@ -107,9 +197,31 @@ body {
     <div id="agenda-box"></div>
 </div>
 
-<div id="p2" class="page">🎵 Médiá</div>
-<div id="p3" class="page">📱 Dom</div>
-<div id="p4" class="page">🌿 Flóra</div>
+<!-- MÉDIÁ -->
+<div id="p2" class="page">
+    <div class="media-wrap">
+        <div class="media-title">Rádio</div>
+
+        <div class="media-grid">
+            <div class="media-card" onclick="playRadio('https://stream.funradio.sk/fun128.mp3','Fun Radio')">📻 Fun Radio</div>
+            <div class="media-card" onclick="playRadio('https://stream.vlna.sk/vlna128.mp3','Radio Vlna')">📻 Radio Vlna</div>
+            <div class="media-card" onclick="playRadio('https://stream.expres.sk/128.mp3','Expres')">📻 Expres</div>
+            <div class="media-card" onclick="playRadio('https://icecast.kiss.cz/kiss128.mp3','Radio Kiss CZ')">📻 Radio Kiss CZ</div>
+        </div>
+
+        <button class="stop-btn" onclick="stopRadio()">⏹ ZASTAVIŤ RADIO</button>
+
+        <div id="now-playing">Neprehráva sa nič</div>
+    </div>
+</div>
+
+<div id="p3" class="page">
+    <div class="simple-page">📱 Dom</div>
+</div>
+
+<div id="p4" class="page">
+    <div class="simple-page">🌿 Flóra</div>
+</div>
 
 <!-- MENU -->
 <nav id="nav">
@@ -127,20 +239,21 @@ body {
     </div>
 </nav>
 
+<audio id="audioPlayer"></audio>
+
 <script>
+const sheetId = '1wAMdy1V_88RKowxIeDsC8Q2ROgS8U44p2NeTfJBKyO8';
+const gid = '602623609';
+const audioPlayer = document.getElementById('audioPlayer');
 
-const sheetId='1wAMdy1V_88RKowxIeDsC8Q2ROgS8U44p2NeTfJBKyO8';
-const gid='602623609';
-
-/* 🕒 HODINY */
 function updateClock(){
-    const now=new Date();
+    const now = new Date();
 
-    document.getElementById('clock').innerText=
-        now.getHours().toString().padStart(2,'0')+":"+
+    document.getElementById('clock').innerText =
+        now.getHours().toString().padStart(2,'0') + ":" +
         now.getMinutes().toString().padStart(2,'0');
 
-    document.getElementById('date-sk').innerText=
+    document.getElementById('date-sk').innerText =
         now.toLocaleDateString('sk-SK',{
             weekday:'long',
             day:'numeric',
@@ -148,71 +261,83 @@ function updateClock(){
         });
 }
 
-/* 📱 MENU */
 function showPage(id,btn){
-    document.querySelectorAll('.page').forEach(p=>p.style.display='none');
-    document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active-nav'));
-    document.getElementById(id).style.display='block';
+    document.querySelectorAll('.page').forEach(p => p.style.display = 'none');
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active-nav'));
+    document.getElementById(id).style.display = 'block';
     btn.classList.add('active-nav');
 }
 
-/* 🌤 POČASIE */
 async function updateWeather(){
     try{
-        let res=await fetch('https://api.open-meteo.com/v1/forecast?latitude=48.3775&longitude=17.5883&current=temperature_2m,weather_code');
-        let data=await res.json();
+        const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=48.3775&longitude=17.5883&current=temperature_2m,weather_code');
+        const data = await res.json();
 
-        document.getElementById('w-temp').innerText=Math.round(data.current.temperature_2m)+"°C";
+        document.getElementById('w-temp').innerText = Math.round(data.current.temperature_2m) + "°C";
 
-        let c=data.current.weather_code;
-        let i="☀️";
-        if(c<=3)i="🌤️";
-        else if(c<50)i="☁️";
-        else if(c<70)i="🌧️";
-        else i="❄️";
+        const c = data.current.weather_code;
+        let i = "☀️";
+        if (c <= 3) i = "🌤️";
+        else if (c < 50) i = "☁️";
+        else if (c < 70) i = "🌧️";
+        else i = "❄️";
 
-        document.getElementById('w-icon').innerText=i;
+        document.getElementById('w-icon').innerText = i;
 
-    }catch(e){
-        document.getElementById('w-temp').innerText="ERR";
+    } catch(e){
+        document.getElementById('w-temp').innerText = "ERR";
     }
 }
 
-/* 📅 AGENDA */
 async function updateAgenda(){
     try{
-        let res=await fetch(`https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&gid=${gid}`);
-        let txt=await res.text();
-        let json=JSON.parse(txt.substring(47).slice(0,-2));
+        const res = await fetch(`https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&gid=${gid}`);
+        const txt = await res.text();
+        const json = JSON.parse(txt.substring(47).slice(0,-2));
 
-        let now=new Date();
-        let html="";
+        const now = new Date();
+        let html = "";
 
-        json.table.rows.forEach(r=>{
-            if(!r.c)return;
+        json.table.rows.forEach(r => {
+            if (!r.c) return;
 
-            let val=r.c[1]?.f||r.c[1]?.v||"";
+            const val = r.c[1]?.f || r.c[1]?.v || "";
 
-            let today=
-                val.includes(`Date(${now.getFullYear()},${now.getMonth()},${now.getDate()}`) ||
-                val.includes(`${now.getDate()}.${now.getMonth()+1}.${now.getFullYear()}`);
+            const today =
+                String(val).includes(`Date(${now.getFullYear()},${now.getMonth()},${now.getDate()}`) ||
+                String(val).includes(`${now.getDate()}.${now.getMonth()+1}.${now.getFullYear()}`);
 
-            if(!today)return;
+            if (!today) return;
 
-            let C=r.c[2]?.v||"";
-            let D=r.c[3]?.v||"";
+            const C = r.c[2]?.v || "";
+            const D = r.c[3]?.v || "";
 
-           html+=`${D||C}`;
+            html += `${D || C}`;
         });
 
-        document.getElementById('agenda-box').innerHTML=html;
+        document.getElementById('agenda-box').innerHTML = html;
 
-    }catch(e){
-        document.getElementById('agenda-box').innerText="❌ chyba";
+    } catch(e){
+        document.getElementById('agenda-box').innerText = "❌ chyba";
     }
 }
 
-/* 🚀 ŠTART */
+async function playRadio(url, name){
+    try{
+        audioPlayer.src = url;
+        await audioPlayer.play();
+        document.getElementById('now-playing').innerText = `Hrá: ${name}`;
+    } catch(e){
+        document.getElementById('now-playing').innerText = 'Prehrávanie sa nepodarilo spustiť';
+    }
+}
+
+function stopRadio(){
+    audioPlayer.pause();
+    audioPlayer.src = "";
+    document.getElementById('now-playing').innerText = 'Neprehráva sa nič';
+}
+
 updateClock();
 updateWeather();
 updateAgenda();
@@ -220,7 +345,6 @@ updateAgenda();
 setInterval(updateClock,1000);
 setInterval(updateWeather,600000);
 setInterval(updateAgenda,60000);
-
 </script>
 
 </body>
