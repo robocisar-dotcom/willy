@@ -2,52 +2,42 @@
 <html lang="sk">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Willy Dashboard</title>
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
     <style>
         body { margin: 0; background: #000; color: #fff; font-family: 'Segoe UI', sans-serif; overflow: hidden; height: 100vh; display: flex; }
         #bg { position: fixed; width: 100%; height: 100%; z-index: -1; background-size: cover; background-position: center; transition: 1.5s; filter: brightness(0.4); background-color: #111; }
         
-        /* Navigácia */
+        /* Menu */
         #side-nav { position: fixed; left: 0; top: 0; height: 100vh; width: 100px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 40px; z-index: 100; }
         .nav-item { cursor: pointer; transition: 0.3s; display: flex; align-items: center; justify-content: center; width: 70px; height: 70px; border-radius: 20px; }
         .nav-item i { font-size: 3.5rem; }
         .icon-home { color: #4285F4; }
         .icon-media { color: #EA4335; }
         .icon-light { color: #FBBC05; }
-        .nav-item.active { background: rgba(255,255,255,0.15); }
+        .active { background: rgba(255,255,255,0.15); }
 
-        /* Tlačidlo SPÄŤ - skryté na začiatku */
-        #back-btn { 
-            display: none; position: fixed; top: 30px; left: 130px; z-index: 200; 
-            background: rgba(255,255,255,0.1); padding: 15px 30px; border-radius: 50px; 
-            border: 1px solid rgba(255,255,255,0.3); cursor: pointer; align-items: center; gap: 10px;
-            backdrop-filter: blur(10px);
-        }
-        #back-btn i { font-size: 2rem; }
-
+        /* Hlavná obrazovka */
         #main-container { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; margin-left: 100px; }
         #clock { font-size: 13rem; font-weight: 900; margin: 0; line-height: 0.8; letter-spacing: -5px; }
-        #date { font-size: 2.5rem; opacity: 0.9; margin-top: 20px; text-transform: capitalize; }
+        #date { font-size: 2.5rem; opacity: 0.8; margin-top: 10px; }
+        
+        /* KALENDÁR / NOTIFIKÁCIE - vrátené pod hodiny */
+        #calendar-info { margin-top: 30px; font-size: 2rem; color: #FBBC05; background: rgba(0,0,0,0.4); padding: 10px 30px; border-radius: 15px; border: 1px solid rgba(255,255,255,0.1); max-width: 80%; }
 
+        /* Karty / Overlay */
         .overlay { display: none; position: fixed; top: 0; left: 100px; right: 0; bottom: 0; background: rgba(0,0,0,0.9); backdrop-filter: blur(25px); z-index: 50; flex-direction: column; align-items: center; justify-content: center; }
         .grid { display: flex; gap: 30px; }
-        .card { background: rgba(255,255,255,0.05); padding: 40px; border-radius: 30px; width: 220px; text-align: center; text-decoration: none; color: white; border: 1px solid rgba(255,255,255,0.1); cursor: pointer; }
+        .card { background: rgba(255,255,255,0.05); padding: 40px; border-radius: 30px; width: 220px; text-align: center; cursor: pointer; border: 1px solid rgba(255,255,255,0.1); text-decoration: none; color: white; }
         .card i { font-size: 5rem; margin-bottom: 15px; }
 
-        #weather-container { position: absolute; top: 20px; right: 20px; display: flex; align-items: center; gap: 15px; background: rgba(0,0,0,0.3); padding: 10px 20px; border-radius: 20px; }
+        #weather-container { position: absolute; top: 25px; right: 25px; display: flex; align-items: center; gap: 12px; }
         #weather-temp { font-size: 2.5rem; font-weight: bold; }
-        #weather-icon { font-size: 3rem; color: #FBBC05; }
     </style>
 </head>
 <body>
     <div id="bg"></div>
-
-    <div id="back-btn" onclick="showSection('home')">
-        <i class="material-icons">arrow_back</i>
-        <span style="font-size: 1.5rem; font-weight: bold;">SPÄŤ</span>
-    </div>
 
     <nav id="side-nav">
         <div id="nav-home" class="nav-item active" onclick="showSection('home')"><i class="material-icons icon-home">home</i></div>
@@ -61,18 +51,23 @@
                 <i id="play-icon" class="material-icons" style="color: #EA4335;">play_circle_filled</i>
                 <h2>KISS</h2>
             </div>
-            <a href="spotify:home" class="card"><i class="material-icons" style="color: #1DB954;">play_circle_filled</i><h2>Spotify</h2></a>
+            <a href="spotify:home" class="card">
+                <i class="material-icons" style="color: #1DB954;">play_circle_filled</i>
+                <h2>Spotify</h2>
+            </a>
         </div>
+        <button onclick="showSection('home')" style="margin-top:40px; color:white; background:none; border:1px solid #fff; padding:10px 30px; border-radius:20px;">ZAVRIEŤ</button>
     </div>
 
     <div id="weather-container">
-        <i id="weather-icon" class="material-icons">wb_sunny</i>
+        <i class="material-icons" style="color: #FBBC05; font-size: 3rem;">wb_sunny</i>
         <div id="weather-temp">--°C</div>
     </div>
 
     <div id="main-container">
         <div id="clock">00:00</div>
-        <div id="date">Načítavam...</div>
+        <div id="date">...</div>
+        <div id="calendar-info">Kalendár sa načítava...</div>
         <audio id="radio-stream" src="https://icecast7.play.cz/kiss128.mp3"></audio>
     </div>
 
@@ -92,10 +87,6 @@
                 window.location.href = 'https://home.google.com/home/1-5c1caa74efc1c6928a286a13ccfe4130cffd72956fd397a2bdc236d4f3c1d328/devices';
                 return;
             }
-
-            // Zobrazenie/skrytie tlačidla SPÄŤ
-            document.getElementById('back-btn').style.display = (s === 'home') ? 'none' : 'flex';
-
             document.getElementById('main-container').style.display = (s=='home')?'flex':'none';
             document.getElementById('media-overlay').style.display = (s=='media')?'flex':'none';
             document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
@@ -106,12 +97,21 @@
             try {
                 const r = await fetch(`https://docs.google.com/spreadsheets/d/${S_ID}/export?format=csv&gid=${G_ID}`);
                 const t = await r.text();
-                const ids = t.split('\n').map(row => row.split(',')[3]).filter(id => id && id.length > 20);
+                const rows = t.split('\n');
+                
+                // 1. FOTKY (stĺpec D / index 3)
+                const ids = rows.map(row => row.split(',')[3]).filter(id => id && id.length > 20);
                 if(ids.length > 0) {
                     const id = ids[Math.floor(Math.random()*ids.length)].replace(/"/g, '').trim();
                     document.getElementById('bg').style.backgroundImage = `url('https://drive.google.com/thumbnail?sz=w1920&id=${id}')`;
                 }
-            } catch(e) {}
+
+                // 2. KALENDÁR (stĺpec E / index 4 - uprav si podľa potreby)
+                const kalendarData = rows[1].split(',')[4]; // Berie dáta z druhého riadku, piateho stĺpca
+                if(kalendarData) {
+                    document.getElementById('calendar-info').innerText = kalendarData.replace(/"/g, '');
+                }
+            } catch(e) { console.log("Chyba dát"); }
             
             try {
                 const r = await fetch(`https://api.open-meteo.com/v1/forecast?latitude=48.37&longitude=17.58&current_weather=true`);
@@ -127,9 +127,9 @@
         }
 
         setInterval(updateTime, 1000);
-        setInterval(loadData, 600000);
+        setInterval(loadData, 300000); // Obnova každých 5 minút
         updateTime();
         loadData();
     </script>
 </body>
-</html>>
+</html>
