@@ -29,11 +29,11 @@ body {
 }
 
 #w-icon{
-    font-size:2.5rem;
+    font-size:3.5rem;
 }
 
 #w-temp{
-    font-size:1.5rem;
+    font-size:2rem;
     font-weight:bold;
 }
 
@@ -71,17 +71,18 @@ body {
     flex:1;
     text-align:center;
     color:rgba(255,255,255,0.4);
-    font-size:0.8rem;
+    font-size:1rem; 
 }
 
 .nav-btn span{
     display:block;
-    font-size:2rem;
+    font-size:3rem; 
+    margin-bottom:5px;
 }
 
 .nav-btn.active-nav{
     color:#fff;
-    transform:translateY(-8px);
+    transform:translateY(-10px);
 }
 
 /* STRÁNKY */
@@ -182,7 +183,7 @@ async function updateAgenda(){
         let C=r.c[2]?.v||"";
         let D=r.c[3]?.v||"";
 
-        html+=`⭐ ${D||C}`;
+        html+= ${D||C}`;
     });
 
     agenda-box.innerHTML=html;
