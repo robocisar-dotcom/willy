@@ -1,117 +1,65 @@
 <!DOCTYPE html>
-<html lang="sk">
+<html jazyk="sk">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta znaková sada="UTF-8">
+    <meta meno="výrez" obsah="šírka=šírka zariadenia, počiatočná mierka=1.0">
     <title>Willy Dashboard</title>
     <style>
-        * { box-sizing: border-box; }
         body { margin: 0; background: #000; color: #fff; font-family: sans-serif; overflow: hidden; height: 100vh; }
-        
-        /* Pozadie pre fotky */
-        #bg { 
-            position: fixed; width: 100%; height: 100%; 
-            z-index: -1; filter: brightness(0.4); 
-            transition: background-image 2s ease-in-out; 
-            background-size: cover; background-position: center;
-            background-color: #111;
-        }
-        
-        /* Hodiny a dátum */
-        #container {
-            display: flex; flex-direction: column; align-items: center; 
-            justify-content: center; height: 100vh; text-align: center;
-        }
-        #clock { font-size: 12rem; font-weight: 100; line-height: 1; margin: 0; }
-        #date { font-size: 3rem; font-weight: 300; margin-top: 10px; color: rgba(255,255,255,0.8); }
-
-        /* Jednoduché menu dole */
-        #nav { 
-            position: fixed; bottom: 0; width: 100%; display: flex; 
-            background: rgba(0,0,0,0.7); padding: 20px 0; backdrop-filter: blur(10px);
-        }
-        .nav-item { flex: 1; text-align: center; font-size: 1.2rem; opacity: 0.6; }
-        .active { opacity: 1; font-weight: bold; border-bottom: 3px solid #fff; padding-bottom: 5px; }
+        #bg { position: fixed; width: 100%; height: 100%; z-index: -1; filter: brightness(0.4); background-size: cover; background-position: center; transition: 2s; background-color: #111; }
+        #container { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; text-align: center; }
+        #clock { font-size: 10rem; font-weight: 100; margin: 0; }
+        #date { font-size: 2.5rem; opacity: 0.8; }
+        #nav { position: fixed; bottom: 0; width: 100%; display: flex; background: rgba(0,0,0,0.5); padding: 15px 0; }
+        .nav-item { flex: 1; text-align: center; opacity: 0.5; }
+        .active { opacity: 1; font-weight: bold; }
     </style>
 </head>
 <body>
+    <div id="bg"></div>
+    <div id="container">
+        <div id="clock">00:00</div>
+        <div id="date">Načítavam...</div>
+    </div>
+    <nav id="nav">
+        <div class="nav-item active">DOMOV</div>
+        <div class="nav-item">MÉDIÁ</div>
+        <div class="nav-item">DOM</div>
+        <div class="nav-item">FLÓRA</div>
+    </nav>
 
-<div id="bg"></div>
+    <script>
+        // TOTO JE TVOJE ID TABUĽKY Z FOTO 17
+        const sheetId = '1vTC382du3NGc6b_DugnxS1y3-p-Yt1iBJ63cmkTIEIp8ELCWEgkUxmXotoqBGCKG7HNc2a-c__7FAu7';
 
-<div id="container">
-    <div id="clock">00:00</div>
-    <div id="date">Načítavam...</div>
-</div>
-
-<nav id="nav">
-    <div class="nav-item active">DOMOV</div>
-    <div class="nav-item">MÉDIÁ</div>
-    <div class="nav-item">DOM</div>
-    <div class="nav-item">FLÓRA</div>
-</nav>
-
-<script>
-    // TVOJE ID TABUĽKY
-    const sheetId = '1wAMdy1V_88RKowxIeDsC8Q2ROgS8U44p2NeTfJBKyO8';
-
-    function updateClock() {
-        const now = new Date();
-        const time = now.toLocaleTimeString('sk-SK', {hour: '2-digit', minute: '2-digit'});
-        const date = now.toLocaleDateString('sk-SK', {weekday: 'long', day: 'numeric', month: 'long'});
-        
-        document.getElementById('clock').innerText = time;
-        document.getElementById('date').innerText = date;
-    }
-
-    async function updateBackground() {
-        try {
-            // Načítame dáta z tabuľky (prvý hárok)
-            const response = await fetch(`https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`);
-            const text = await response.text();
-            const json = JSON.parse(text.substring(47).slice(0, -2));
-            
-            // Vytiahneme ID zo stĺpca D (index 3)
-            const photoIds = json.table.rows
-                .map(row => (row.c && row.c[3]) ? row.c[3].v : null)
-                .filter(id => id && id.length > 20);
-
-            if (photoIds.length > 0) {
-                // Vyberieme náhodnú fotku
-                const randomId = photoIds[Math.floor(Math.random() * photoIds.length)];
-                const imgUrl = `https://drive.google.com/thumbnail?sz=w1920&id=${randomId}`;
-                
-                // Plynulá zmena pozadia
-                const bg = document.getElementById('bg');
-                const tempImg = new Image();
-                tempImg.src = imgUrl;
-                tempImg.onload = () => {
-                    bg.style.backgroundImage = `url('${imgUrl}')`;
-                };
-            }
-        } catch (error) {
-            console.error("Chyba pri načítaní fotiek:", error);
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('clock').innerText = now.toLocaleTimeString('sk-SK', {hour:'2-digit', minute:'2-digit'});
+            document.getElementById('date').innerText = now.toLocaleDateString('sk-SK', {weekday:'long', day:'numeric', month:'long'});
         }
-    }
 
-    // Spustíme hodiny každú sekundu
-    setInterval(updateClock, 1000);
-    // Fotku zmeníme každých 60 sekúnd
-    setInterval(updateBackground, 60000);
+        async function updateBG() {
+            try {
+                const r = await fetch(`https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`);
+                const t = await r.text();
+                const j = JSON.parse(t.substring(47).slice(0, -2));
+                const ids = j.table.rows.map(r => (r.c && r.c[3]) ? r.c[3].v : null).filter(id => id && id.length > 20);
+                
+                if (ids.length > 0) {
+                    const id = ids[Math.floor(Math.random() * ids.length)];
+                    const imgUrl = `https://drive.google.com/thumbnail?sz=w1920&id=${id}`;
+                    const bg = document.getElementById('bg');
+                    const img = new Image();
+                    img.src = imgUrl;
+                    img.onload = () => { bg.style.backgroundImage = `url('${imgUrl}')`; };
+                }
+            } catch (e) { console.error(e); }
+        }
 
-    // Prvé spustenie hneď po načítaní
-    updateClock();
-    updateBackground();
-</script>
-
-</body>
-</html>
-
-    setInterval(updateClock, 1000);
-    setInterval(updateBackground, 30000); // Každých 30 sekúnd nová fotka
-    
-    updateClock();
-    updateBackground();
-</script>
-
+        setInterval(updateClock, 1000);
+        setInterval(updateBG, 60000);
+        updateClock();
+        updateBG();
+    </script>
 </body>
 </html>
