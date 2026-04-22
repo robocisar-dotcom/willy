@@ -1,56 +1,39 @@
 <!DOCTYPE html>
-<html lang="sk">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Willy Dashboard</title>
+    <title>Willy</title>
     <style>
-        body { margin: 0; background: #000; color: #fff; font-family: sans-serif; overflow: hidden; height: 100vh; }
-        #bg { position: fixed; width: 100%; height: 100%; z-index: -1; filter: brightness(0.5); background-size: cover; background-position: center; transition: 2s; background-color: #111; }
-        #container { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; text-align: center; }
-        #clock { font-size: 10rem; font-weight: 100; margin: 0; }
-        #date { font-size: 2.5rem; opacity: 0.8; margin-top: 10px; }
+        body { margin: 0; background: #000; color: #fff; font-family: sans-serif; overflow: hidden; }
+        #bg { position: fixed; width: 100%; height: 100%; z-index: -1; background-size: cover; background-position: center; transition: 2s; }
+        #container { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; }
+        #clock { font-size: 8rem; }
     </style>
 </head>
 <body>
     <div id="bg"></div>
     <div id="container">
         <div id="clock">00:00</div>
-        <div id="date">Načítavam...</div>
     </div>
-
     <script>
-        const S_ID = '1vTC382du3NGc6b_DugnxS1y3-p-Yt1iBJ63cmkTIEIp8';
-
-        function tick() {
-            const now = new Date();
-            document.getElementById('clock').innerText = now.toLocaleTimeString('sk-SK', {hour: '2-digit', minute: '2-digit'});
-            document.getElementById('date').innerText = now.toLocaleDateString('sk-SK', {weekday: 'long', day: 'numeric', month: 'long'});
+        // Tvoje presné ID tabuľky
+        const id = '1vTC382du3NGc6b_DugnxS1y3-p-Yt1iBJ63cmkTIEIp8';
+        
+        async function run() {
+            // CSV export - najspoľahlivejší spôsob
+            const r = await fetch(`https://docs.google.com/spreadsheets/d/${id}/export?format=csv`);
+            const txt = await r.text();
+            const rows = txt.split('\n');
+            const ids = rows.map(r => r.split(',')[3]).filter(i => i && i.length > 10);
+            
+            if (ids.length > 0) {
+                const imgId = ids[Math.floor(Math.random() * ids.length)].replace(/"/g, '').trim();
+                document.getElementById('bg').style.backgroundImage = `url('https://drive.google.com/thumbnail?sz=w1920&id=${imgId}')`;
+            }
+            document.getElementById('clock').innerText = new Date().toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
         }
-
-        async function loadImg() {
-            try {
-                const r = await fetch('https://docs.google.com/spreadsheets/d/' + S_ID + '/gviz/tq?tqx=out:json');
-                const t = await r.text();
-                const j = JSON.parse(t.substring(47).slice(0, -2));
-                const ids = j.table.rows
-                    .map(row => (row.c && row.c[3] && row.c[3].v) ? row.c[3].v.toString().trim() : null)
-                    .filter(id => id && id.length > 20);
-
-                if (ids.length > 0) {
-                    const id = ids[Math.floor(Math.random() * ids.length)];
-                    const url = 'https://drive.google.com/thumbnail?sz=w1920&id=' + id;
-                    const img = new Image();
-                    img.src = url;
-                    img.onload = () => { document.getElementById('bg').style.backgroundImage = 'url(' + url + ')'; };
-                }
-            } catch (e) { console.log('Error'); }
-        }
-
-        setInterval(tick, 1000);
-        setInterval(loadImg, 60000);
-        tick();
-        loadImg();
+        setInterval(run, 30000);
+        run();
     </script>
 </body>
 </html>
