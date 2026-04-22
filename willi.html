@@ -1,103 +1,154 @@
 <!DOCTYPE html>
 <html lang="sk">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Willy Dashboard</title>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Willy Dashboard</title>
+    <style>
+        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        body { 
+            margin: 0; background: #000; color: #fff; font-family: 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; 
+            overflow: hidden; height: 100vh; width: 100vw; 
+        }
+        
+        #bg { 
+            position: fixed; width: 100%; height: 100%; 
+            z-index: -1; filter: brightness(0.5); 
+            background-size: cover; background-position: center;
+            background-color: #111;
+            transition: background-image 1s ease-in-out;
+        }
 
-<style>
-body { margin:0; background:#000; color:#fff; font-family:'Segoe UI'; }
-#clock { font-size:120px; text-align:center; margin-top:100px; }
-#date-sk { text-align:center; font-size:30px; }
-#agenda-box { text-align:center; margin-top:40px; }
-</style>
+        #weather-box {
+            position: absolute; top: 20px; right: 25px; text-align: center;
+            background: rgba(0,0,0,0.4); padding: 12px 18px; border-radius: 20px;
+            backdrop-filter: blur(10px); z-index: 10;
+        }
+
+        .page { 
+            display: none; width: 100vw; height: 100vh; 
+            flex-direction: column; align-items: center; 
+            justify-content: flex-start; padding-top: 8vh; text-align: center; 
+        }
+        .active { display: flex; }
+
+        #clock { font-size: clamp(6rem, 20vh, 14rem); font-weight: 800; }
+        #date-sk { font-size: clamp(1.5rem, 4vh, 2.5rem); margin-top: 10px; }
+
+        #agenda-box {
+            margin-top: 40px;
+            padding: 20px;
+            border-radius: 20px;
+        }
+
+        .agenda-item { font-size: 2rem; }
+        .agenda-detail { font-size: 1.4rem; opacity: 0.7; }
+
+        #nav { 
+            position: fixed; bottom: 0; width: 100%; 
+            display: flex; justify-content: space-around;
+            padding: 15px;
+            background: rgba(0,0,0,0.7);
+        }
+        .nav-btn { color: rgba(255,255,255,0.3); flex:1; text-align:center; }
+        .nav-btn.active-nav { color:#fff; }
+    </style>
 </head>
 
 <body>
 
-<div id="clock"></div>
-<div id="date-sk"></div>
-<div id="agenda-box"></div>
+<div id="bg"></div>
 
-<div id="w-temp" style="position:absolute;top:20px;right:20px">--°C</div>
-<div id="w-icon" style="position:absolute;top:50px;right:20px">--</div>
+<div id="weather-box">
+    <div id="w-icon">--</div>
+    <div id="w-temp">--°C</div>
+</div>
+
+<div id="p1" class="page active">
+    <div id="clock"></div>
+    <div id="date-sk"></div>
+    <div id="agenda-box"></div>
+</div>
+
+<nav id="nav">
+    <div class="nav-btn active-nav">DOMOV</div>
+</nav>
 
 <script>
 
 const sheetId = '1wAMdy1V_88RKowxIeDsC8Q2ROgS8U44p2NeTfJBKyO8';
-const gid = '602623609';
+const gidKalendar = '602623609';
 
-function updateClock(){
-    let now = new Date();
-    clock.innerText = now.toLocaleTimeString('sk-SK',{hour:'2-digit',minute:'2-digit'});
-    date_sk.innerText = now.toLocaleDateString('sk-SK',{weekday:'long',day:'numeric',month:'long'});
+function updateClock() {
+    const now = new Date();
+
+    document.getElementById('clock').innerText =
+        now.getHours().toString().padStart(2,'0') + ":" +
+        now.getMinutes().toString().padStart(2,'0');
+
+    // ✅ FIX TU
+    document.getElementById('date-sk').innerText =
+        now.toLocaleDateString('sk-SK', {
+            weekday:'long',
+            day:'numeric',
+            month:'long'
+        });
 }
 
-async function updateWeather(){
-    try{
-        let res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=48.3775&longitude=17.5883&current=temperature_2m,weather_code');
-        let data = await res.json();
+async function updateWeather() {
+    try {
+        const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=48.3775&longitude=17.5883&current=temperature_2m,weather_code');
+        const data = await res.json();
 
-        document.getElementById('w-temp').innerText = Math.round(data.current.temperature_2m) + "°C";
+        document.getElementById('w-temp').innerText =
+            Math.round(data.current.temperature_2m) + "°C";
 
         let code = data.current.weather_code;
         let icon = "☀️";
 
-        if(code <= 3) icon = "🌤️";
-        else if(code < 50) icon = "☁️";
-        else if(code < 70) icon = "🌧️";
+        if (code <= 3) icon = "🌤️";
+        else if (code < 50) icon = "☁️";
+        else if (code < 70) icon = "🌧️";
         else icon = "❄️";
 
         document.getElementById('w-icon').innerText = icon;
 
-    }catch(e){
-        console.log("weather error:", e);
+    } catch (e) {
         document.getElementById('w-temp').innerText = "ERR";
     }
 }
 
-async function updateAgenda(){
-    try{
-        let res = await fetch(`https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&gid=${gid}`);
-        let txt = await res.text();
+async function updateAgenda() {
+    try {
+        const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&gid=${gidKalendar}`;
+        const res = await fetch(url);
+        const text = await res.text();
+        const json = JSON.parse(text.substring(47).slice(0, -2));
 
-        console.log("RAW:", txt.substring(0,100)); // 🔥 debug
-
-        let json = JSON.parse(txt.substring(47).slice(0,-2));
-
-        let now = new Date();
+        const now = new Date();
         let html = "";
-        let found = 0;
 
-        json.table.rows.forEach(r=>{
-            if(!r.c) return;
+        json.table.rows.forEach(row => {
+            if (!row.c) return;
 
-            let val = r.c[1]?.f || r.c[1]?.v || "";
-
-            console.log("ROW DATE:", val); // 🔥 debug
+            let val = row.c[1]?.f || row.c[1]?.v || "";
 
             let isToday =
                 val.includes(`Date(${now.getFullYear()},${now.getMonth()},${now.getDate()}`) ||
                 val.includes(`${now.getDate()}.${now.getMonth()+1}.${now.getFullYear()}`);
 
-            if(!isToday) return;
+            if (!isToday) return;
 
-            let C = r.c[2]?.v || "";
-            let D = r.c[3]?.v || "";
+            let C = row.c[2]?.v || "";
+            let D = row.c[3]?.v || "";
 
-            html += `<div>⭐ ${D || C}</div>`;
-            found++;
+            html += `<div class="agenda-item">⭐ ${D || C}</div>`;
         });
 
-        if(!found){
-            html = "⚠️ nič na dnes";
-        }
+        document.getElementById('agenda-box').innerHTML = html;
 
-        agenda_box.innerHTML = html;
-
-    }catch(e){
-        console.log("agenda error:", e);
-        agenda_box.innerHTML = "❌ chyba";
+    } catch (e) {
+        document.getElementById('agenda-box').innerText = "❌ chyba";
     }
 }
 
@@ -105,10 +156,11 @@ updateClock();
 updateWeather();
 updateAgenda();
 
-setInterval(updateClock,1000);
-setInterval(updateWeather,600000);
-setInterval(updateAgenda,60000);
+setInterval(updateClock, 1000);
+setInterval(updateWeather, 600000);
+setInterval(updateAgenda, 60000);
 
 </script>
+
 </body>
 </html>
