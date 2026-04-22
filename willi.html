@@ -1,18 +1,14 @@
 <!DOCTYPE html>
-<html jazyk="sk">
+<html>
 <head>
-    <meta znaková sada="UTF-8">
-    <meta meno="výrez" obsah="šírka=šírka zariadenia, počiatočná mierka=1.0">
-    <title>Willy Dashboard</title>
+    <meta charset="UTF-8">
+    <title>Willy</title>
     <style>
-        body { margin: 0; background: #000; color: #fff; font-family: sans-serif; overflow: hidden; height: 100vh; }
-        #bg { position: fixed; width: 100%; height: 100%; z-index: -1; filter: brightness(0.4); background-size: cover; background-position: center; transition: 2s; background-color: #111; }
+        body { margin: 0; background: #000; color: #fff; font-family: sans-serif; overflow: hidden; }
+        #bg { position: fixed; width: 100%; height: 100%; z-index: -1; filter: brightness(0.5); background-size: cover; background-position: center; transition: 2s; }
         #container { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 100vh; text-align: center; }
         #clock { font-size: 10rem; font-weight: 100; margin: 0; }
         #date { font-size: 2.5rem; opacity: 0.8; }
-        #nav { position: fixed; bottom: 0; width: 100%; display: flex; background: rgba(0,0,0,0.5); padding: 15px 0; }
-        .nav-item { flex: 1; text-align: center; opacity: 0.5; }
-        .active { opacity: 1; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -21,16 +17,10 @@
         <div id="clock">00:00</div>
         <div id="date">Načítavam...</div>
     </div>
-    <nav id="nav">
-        <div class="nav-item active">DOMOV</div>
-        <div class="nav-item">MÉDIÁ</div>
-        <div class="nav-item">DOM</div>
-        <div class="nav-item">FLÓRA</div>
-    </nav>
 
     <script>
-        // TOTO JE TVOJE ID TABUĽKY Z FOTO 17
-        const sheetId = '1vTC382du3NGc6b_DugnxS1y3-p-Yt1iBJ63cmkTIEIp8ELCWEgkUxmXotoqBGCKG7HNc2a-c__7FAu7';
+        // TVOJE ID (OČISTENÉ)
+        const sheetId = '1vTC382du3NGc6b_DugnxS1y3-p-Yt1iBJ63cmkTIEIp8';
 
         function updateClock() {
             const now = new Date();
@@ -40,20 +30,27 @@
 
         async function updateBG() {
             try {
-                const r = await fetch(`https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json`);
-                const t = await r.text();
-                const j = JSON.parse(t.substring(47).slice(0, -2));
-                const ids = j.table.rows.map(r => (r.c && r.c[3]) ? r.c[3].v : null).filter(id => id && id.length > 20);
+                // Skúsime CSV formát - ten Google takmer nikdy neblokuje
+                const r = await fetch(`https://docs.google.com/spreadsheets/d/${sheetId}/export?format=csv`);
+                const data = await r.text();
                 
-                if (ids.length > 0) {
-                    const id = ids[Math.floor(Math.random() * ids.length)];
+                // Rozbijeme riadky a zoberieme stĺpec D (index 3)
+                const rows = data.split('\n');
+                const photoIds = rows.map(row => {
+                    const cols = row.split(',');
+                    return cols[3] ? cols[3].trim().replace(/"/g, '') : null;
+                }).filter(id => id && id.length > 20);
+
+                if (photoIds.length > 0) {
+                    const id = photoIds[Math.floor(Math.random() * photoIds.length)];
                     const imgUrl = `https://drive.google.com/thumbnail?sz=w1920&id=${id}`;
+                    
                     const bg = document.getElementById('bg');
                     const img = new Image();
                     img.src = imgUrl;
                     img.onload = () => { bg.style.backgroundImage = `url('${imgUrl}')`; };
                 }
-            } catch (e) { console.error(e); }
+            } catch (e) { console.error("Chyba:", e); }
         }
 
         setInterval(updateClock, 1000);
