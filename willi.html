@@ -49,16 +49,6 @@
         <button onclick="showSection('home')" style="margin-top:40px; color:white; background:none; border:1px solid #fff; padding:10px 30px; border-radius:20px; cursor:pointer;">Späť</button>
     </div>
 
-    <div id="light-overlay" class="overlay">
-        <div class="grid">
-            <a href="https://home.google.com/home/1-5c1caa74efc1c6928a286a13ccfe4130cffd72956fd397a2bdc236d4f3c1d328/devices" target="_blank" class="card">
-                <i class="material-icons" style="color: #FBBC05;">tungsten</i>
-                <h2>Moje Svetlá</h2>
-            </a>
-        </div>
-        <button onclick="showSection('home')" style="margin-top:40px; color:white; background:none; border:1px solid #fff; padding:10px 30px; border-radius:20px; cursor:pointer;">Späť</button>
-    </div>
-
     <div id="weather-container">
         <i id="weather-icon" class="material-icons">wb_sunny</i>
         <div id="weather-temp">--°C</div>
@@ -74,9 +64,15 @@
         const G_ID = '230699175';
 
         function showSection(s) {
+            if (s === 'light') {
+                // Otvorí Google Home v tom istom okne pre ľahší návrat tlačidlom SPÄŤ
+                window.location.href = 'https://home.google.com/home/1-5c1caa74efc1c6928a286a13ccfe4130cffd72956fd397a2bdc236d4f3c1d328/devices';
+                return;
+            }
+
             document.getElementById('main-container').style.display = (s=='home')?'flex':'none';
             document.getElementById('media-overlay').style.display = (s=='media')?'flex':'none';
-            document.getElementById('light-overlay').style.display = (s=='light')?'flex':'none';
+            
             document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
             document.getElementById('nav-'+s).classList.add('active');
         }
@@ -89,7 +85,9 @@
                 if(ids.length > 0) {
                     const id = ids[Math.floor(Math.random()*ids.length)].replace(/"/g, '').trim();
                     const imgUrl = `https://drive.google.com/thumbnail?sz=w1920&id=${id}`;
-                    document.getElementById('bg').style.backgroundImage = `url('${imgUrl}')`;
+                    const img = new Image();
+                    img.src = imgUrl;
+                    img.onload = () => { document.getElementById('bg').style.backgroundImage = `url('${imgUrl}')`; };
                 }
             } catch(e) { console.log("Foto error"); }
             
@@ -116,6 +114,10 @@
         setInterval(loadData, 600000);
         updateTime();
         loadData();
+
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js');
+        }
     </script>
 </body>
 </html>
