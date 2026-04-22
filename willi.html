@@ -11,32 +11,31 @@
         /* POZADIE */
         #bg { position: fixed; width: 100%; height: 100%; z-index: -1; 
               background-size: cover; background-position: center center; 
-              transition: 1s ease-in-out; filter: brightness(0.5); background-color: #111; }
+              transition: 1.5s ease-in-out; filter: brightness(0.5); background-color: #111; }
         
         /* POČASIE V PRAVOM HORNOM ROHU */
         #weather-container { position: absolute; top: 20px; right: 20px; display: flex; flex-direction: column; align-items: center; text-align: right; background: rgba(0,0,0,0.4); padding: 15px; border-radius: 20px; backdrop-filter: blur(10px); border: 1px solid rgba(255,255,255,0.1); }
         #weather-icon { width: 70px; height: 70px; }
         #weather-temp { font-size: 2.5rem; font-weight: bold; }
-        #weather-feels { font-size: 1rem; opacity: 0.7; }
+        #weather-feels { font-size: 0.9rem; opacity: 0.7; }
 
-        /* HODINY */
+        /* HODINY - HRUBÉ A VÝRAZNÉ */
         #main-container { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; }
-        #clock { font-size: 12rem; font-weight: 900; margin: 0; line-height: 0.8; letter-spacing: -5px; }
+        #clock { font-size: 13rem; font-weight: 900; margin: 0; line-height: 0.8; letter-spacing: -5px; }
         #date { font-size: 2.5rem; opacity: 0.9; margin-top: 20px; font-weight: 300; text-transform: capitalize; }
         
-        /* TLAČIDLÁ PREPÍNANIA */
-        .btn-nav { position: absolute; top: 50%; transform: translateY(-50%); padding: 40px 20px; background: rgba(255,255,255,0.03); color: white; border: none; cursor: pointer; font-size: 3rem; border-radius: 15px; transition: 0.3s; z-index: 10; }
-        .btn-nav:hover { background: rgba(255,255,255,0.15); }
-        #btn-prev { left: 10px; }
-        #btn-next { right: 10px; }
+        /* TLAČIDLÁ PREPÍNANIA FOTIEK */
+        .btn-nav { position: absolute; top: 50%; transform: translateY(-50%); padding: 50px 20px; background: rgba(255,255,255,0.02); color: white; border: none; cursor: pointer; font-size: 3rem; border-radius: 15px; transition: 0.3s; z-index: 10; }
+        .btn-nav:hover { background: rgba(255,255,255,0.1); }
+        #btn-prev { left: 5px; }
+        #btn-next { right: 5px; }
 
-        /* DOLNÁ LIŠTA S IKONAMI */
-        #nav-bar { position: fixed; bottom: 0; width: 100%; height: 100px; display: flex; background: rgba(0,0,0,0.85); backdrop-filter: blur(20px); border-top: 1px solid rgba(255,255,255,0.1); }
-        .nav-item { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; opacity: 0.4; transition: 0.3s; cursor: pointer; }
-        .nav-item i { font-size: 2.2rem; margin-bottom: 5px; }
-        .nav-item span { font-size: 0.8rem; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+        /* DOLNÁ LIŠTA - LEN IKONY */
+        #nav-bar { position: fixed; bottom: 0; width: 100%; height: 90px; display: flex; background: rgba(0,0,0,0.8); backdrop-filter: blur(20px); border-top: 1px solid rgba(255,255,255,0.1); }
+        .nav-item { flex: 1; display: flex; align-items: center; justify-content: center; opacity: 0.3; transition: 0.4s; cursor: pointer; }
+        .nav-item i { font-size: 3rem; } /* Väčšie ikony namiesto textu */
         
-        .nav-item.active { opacity: 1; color: #fff; background: rgba(255,255,255,0.05); border-top: 4px solid #fff; }
+        .nav-item.active { opacity: 1; color: #fff; background: rgba(255,255,255,0.08); border-top: 5px solid #fff; }
     </style>
 </head>
 <body>
@@ -60,19 +59,15 @@
     <nav id="nav-bar">
         <div class="nav-item active">
             <i class="material-icons">home</i>
-            <span>Domov</span>
         </div>
         <div class="nav-item">
             <i class="material-icons">play_circle_filled</i>
-            <span>Médiá</span>
         </div>
         <div class="nav-item">
             <i class="material-icons">lightbulb</i>
-            <span>Osvetlenie</span>
         </div>
         <div class="nav-item">
             <i class="material-icons">local_florist</i>
-            <span>Flóra</span>
         </div>
     </nav>
 
@@ -136,7 +131,7 @@
 
         setInterval(updateTime, 1000);
         setInterval(updateWeather, 900000); 
-        setInterval(() => changePhoto(1), 120000); // Auto-prehodenie každé 2 minúty
+        setInterval(() => changePhoto(1), 120000); 
         
         loadPhotoList();
         updateWeather();
