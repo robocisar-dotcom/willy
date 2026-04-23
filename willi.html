@@ -1,20 +1,6 @@
 <!DOCTYPE html>
 <html lang="sk">
-<head>async function saveCell(row, value){
-    try{
-        await fetch("https://script.google.com/macros/s/AKfycbzBloze5aJ9fMtde-tlQXQMmi6yfFYayS9B08ZFML0tbGnxz3mbQVFwh92VUgebZ7xo/exec", {
-            method: "POST",
-            body: JSON.stringify({
-                row: row,
-                value: value
-            })
-        });
-
-        console.log("uložené");
-    }catch(e){
-        console.error("chyba ukladania", e);
-    }
-}
+<head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Willy Dashboard</title>
@@ -197,22 +183,6 @@ body{
     padding:0 clamp(4px, 2vw, 20px);
     min-height:2em;
     max-width:min(90vw, 900px);
-}
-
-/* jednotlivé udalosti */
-.agenda-item{
-    text-align:left;
-    margin-bottom:6px;
-    font-weight:600;
-    color:#fff;
-}
-
-/* jemnejší detail (ak použiješ) */
-.agenda-detail{
-    text-align:left;
-    font-size:0.8em;
-    opacity:0.8;
-    margin-bottom:4px;
 }
 
 /* KARTY / MÉDIÁ / DOM / FLÓRA */
@@ -503,8 +473,10 @@ body{
             <table>
                 <thead>
                     <tr>
+                        <th>Deň</th>
                         <th>Dátum</th>
-<th>Poznámka</th>
+                        <th>Udalosť</th>
+                        <th>Práve dnes</th>
                     </tr>
                 </thead>
                 <tbody id="sheet-table-body">
@@ -541,39 +513,252 @@ body{
 
 <audio id="audioPlayer"></audio>
 <script>
-    function updateClock() {
+console.log("WILLI BEZI");
+
+const sheetId = '1wAMdy1V_88RKowxIeDsC8Q2ROgS8U44p2NeTfJBKyO8';
+const gid = '602623609';
+const audioPlayer = document.getElementById('audioPlayer');
+
+function updateClock() {
     const now = new Date();
 
     document.getElementById('clock').innerText =
         now.getHours().toString().padStart(2, '0') + ":" +
         now.getMinutes().toString().padStart(2, '0');
+
+    document.getElementById('date-sk').innerText =
+        now.toLocaleDateString('sk-SK', {
+            weekday: 'long',
+            day: 'numeric',
+            month: 'long'
+        });
 }
-async function updateWeather() {
-    try {
-        const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=48.3775&longitude=17.5883&current=temperature_2m,weather_code');
-        const data = await res.json();
 
-        const temp = Math.round(data.current.temperature_2m);
-        document.getElementById('w-temp').innerText = temp + "°C";
+async function updateBattery() {
+    const el = document.getElementById('battery');
+    if (!el) return;
 
-        const code = data.current.weather_code;
+    if (navigator.getBattery) {
+        try {
+            const battery = await navigator.getBattery();
 
-        let icon = "☀️";
-        if (code <= 3) icon = "☀️";
-        else if (code < 50) icon = "🌤️";
-        else if (code < 70) icon = "🌧️";
-        else icon = "❄️";
+            const update = () => {
+                const level = Math.round(battery.level * 100);
+                const charging = battery.charging ? "⚡" : "";
+                el.innerText = `🔋 ${level}% ${charging}`;
+            };
 
-        document.getElementById('w-icon').innerText = icon;
-
-    } catch (e) {
-        document.getElementById('w-temp').innerText = "ERR";
+            update();
+            battery.addEventListener('levelchange', update);
+            battery.addEventListener('chargingchange', update);
+        } catch (e) {
+            el.innerText = "🔋 ERR";
+        }
+    } else {
+        el.innerText = "🔋 N/A";
     }
 }
+
+function showPage(id, btn) {
+    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active-nav'));
+
+    document.getElementById(id).classList.add('active');
+    btn.classList.add('active-nav');
+
+    const weather = document.getElementById('weather-box');
+    const battery = document.getElementById('battery');
+
+    if (id === 'p1') {
+        if (weather) weather.style.display = 'block';
+        if (battery) battery.style.display = 'block';
+    } else {
+        if (weather) weather.style.display = 'none';
+        if (battery) battery.style.display = 'none';
+    }
+}
+
+async function updateWeather() {
+    try {
+        const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=48.3775&longitude=17.5883&current=temperature_2m,weather_code&daily=weather_code,temperature_2m_max&timezone=auto');
+        const data = await res.json();
+
+        const wTemp = document.getElementById('w-temp');
+        const wIcon = document.getElementById('w-icon');
+
+        if (wTemp) {
+            wTemp.innerText = Math.round(data.current.temperature_2m) + "°C";
+        }
+
+        const getIcon = (code, night = false) => {
+            if (code <= 3) return night ? "🌙" : "☀️";
+            if (code < 50) return night ? "🌙☁️" : "🌤️";
+            if (code < 70) return "🌧️";
+            return "❄️";
+        };
+
+        const hour = new Date().getHours();
+        const isNight = (hour >= 21 || hour < 6);
+
+        if (wIcon) {
+            wIcon.innerText = getIcon(data.current.weather_code, isNight);
+        }
+
+        const icons = document.querySelectorAll('.f-icon');
+        const temps = document.querySelectorAll('.f-temp');
+
+        for (let i = 1; i <= 2; i++) {
+            if (icons[i - 1] && temps[i - 1]) {
+                icons[i - 1].innerText = getIcon(data.daily.weather_code[i], false);
+                temps[i - 1].innerText = Math.round(data.daily.temperature_2m_max[i]) + "°";
+            }
+        }
+    } catch (e) {
+        const wTemp = document.getElementById('w-temp');
+        if (wTemp) wTemp.innerText = "ERR";
+        console.error("Weather error:", e);
+    }
+}
+
+async function updateAgenda() {
+    try {
+        const res = await fetch(`https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&gid=${gid}`);
+        const txt = await res.text();
+        const json = JSON.parse(txt.substring(47).slice(0, -2));
+
+        const now = new Date();
+        const todayDay = now.getDate();
+        const todayMonth = now.getMonth() + 1;
+        const todayYear = now.getFullYear();
+
+        let html = "";
+
+        json.table.rows.forEach(r => {
+            if (!r.c) return;
+
+            const dateCell = r.c[1];
+            const eventC = r.c[2]?.v || "";
+            const eventD = r.c[3]?.v || "";
+            if (!dateCell) return;
+
+            let isToday = false;
+
+            if (dateCell.f) {
+                const clean = String(dateCell.f).replace(/\s+/g, "");
+                const m = clean.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+                if (m) {
+                    const d = parseInt(m[1], 10);
+                    const mo = parseInt(m[2], 10);
+                    const y = parseInt(m[3], 10);
+                    if (d === todayDay && mo === todayMonth && y === todayYear) {
+                        isToday = true;
+                    }
+                }
+            }
+
+            if (!isToday && typeof dateCell.v === "string" && dateCell.v.startsWith("Date(")) {
+                const m = dateCell.v.match(/Date\((\d+),(\d+),(\d+)/);
+                if (m) {
+                    const y = parseInt(m[1], 10);
+                    const mo = parseInt(m[2], 10) + 1;
+                    const d = parseInt(m[3], 10);
+                    if (d === todayDay && mo === todayMonth && y === todayYear) {
+                        isToday = true;
+                    }
+                }
+            }
+
+            if (!isToday) return;
+
+            if (eventC) {
+                html += `<div class="agenda-item">📌 ${eventC}</div>`;
+            }
+
+            if (eventD) {
+                html += `<div class="agenda-detail">✨ ${eventD}</div>`;
+            }
+        });
+
+        document.getElementById('agenda-box').innerHTML = html || "Žiadna dnešná udalosť";
+    } catch (e) {
+        document.getElementById('agenda-box').innerText = "❌ chyba";
+        console.error("Agenda error:", e);
+    }
+}
+
+async function updateSheetTable() {
+    try {
+        const res = await fetch(`https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&gid=${gid}`);
+        const txt = await res.text();
+        const json = JSON.parse(txt.substring(47).slice(0, -2));
+
+        const tbody = document.getElementById('sheet-table-body');
+        if (!tbody) return;
+
+        let html = '';
+
+        json.table.rows.slice(0, 12).forEach(r => {
+            if (!r.c) return;
+
+            const day = r.c[0]?.v || '';
+            const date = r.c[1]?.f || r.c[1]?.v || '';
+            const event = r.c[2]?.v || '';
+            const today = r.c[3]?.v || '';
+
+            html += `
+                <tr>
+                    <td>${day}</td>
+                    <td>${date}</td>
+                    <td>${event}</td>
+                    <td>${today}</td>
+                </tr>
+            `;
+        });
+
+        tbody.innerHTML = html || `<tr><td colspan="4">Žiadne dáta</td></tr>`;
+    } catch (e) {
+        const tbody = document.getElementById('sheet-table-body');
+        if (tbody) {
+            tbody.innerHTML = `<tr><td colspan="4">Nepodarilo sa načítať tabuľku</td></tr>`;
+        }
+        console.error("Table error:", e);
+    }
+}
+
+async function playRadio(url, name) {
+    try {
+        audioPlayer.pause();
+        audioPlayer.src = "";
+        audioPlayer.load();
+
+        audioPlayer.src = url;
+        await audioPlayer.play();
+
+        document.getElementById('now-playing').innerText = `Hrá: ${name}`;
+    } catch (e) {
+        document.getElementById('now-playing').innerText = '❌ Rádio blokované alebo nedostupné';
+        console.error("Radio error:", e);
+    }
+}
+
+function stopRadio() {
+    audioPlayer.pause();
+    audioPlayer.src = "";
+    document.getElementById('now-playing').innerText = 'Neprehráva sa nič';
+}
+
 updateClock();
-setInterval(updateClock, 1000);
+updateBattery();
 updateWeather();
+updateAgenda();
+updateSheetTable();
+
+setInterval(updateClock, 1000);
 setInterval(updateWeather, 600000);
+setInterval(updateAgenda, 60000);
+setInterval(updateSheetTable, 120000);
 </script>
+
 </body>
 </html>
+
