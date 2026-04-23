@@ -28,10 +28,28 @@
     --bottom-pad: calc(100px + env(safe-area-inset-bottom));
 }
 
-*{
-    box-sizing:border-box;
-    -webkit-tap-highlight-color:transparent;
+/* 🔄 REFRESH BUTTON */
+#refresh-btn{
+    position:absolute;
+    top:clamp(12px, 2vw, 20px);
+    left:clamp(12px, 2vw, 20px);
+    background:rgba(0,0,0,0.6);
+    border:1px solid rgba(255,255,255,0.2);
+    color:#fff;
+    width:clamp(44px, 6vw, 70px);
+    height:clamp(44px, 6vw, 70px);
+    border-radius:50%;
+    font-size:clamp(1.2rem, 2.5vw, 2rem);
+    backdrop-filter:blur(10px);
+    cursor:pointer;
+    z-index:20;
+    transition:0.2s;
 }
+#refresh-btn:active{
+    transform:scale(0.9) rotate(90deg);
+}
+
+*{ box-sizing:border-box; }
 
 html, body{
     margin:0;
@@ -40,11 +58,7 @@ html, body{
     overflow:hidden;
     background:var(--bg);
     color:var(--text);
-    font-family:'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
-}
-
-body{
-    position:relative;
+    font-family:'Segoe UI', sans-serif;
 }
 
 #bg{
@@ -52,278 +66,68 @@ body{
     inset:0;
     z-index:-1;
     background:#111;
-    background-size:cover;
-    background-position:center;
-    filter:brightness(0.5);
-    transition:background-image 1s ease-in-out;
 }
 
 /* POČASIE */
 #weather-box{
     position:absolute;
-    top:clamp(12px, 2vw, 20px);
-    right:clamp(12px, 2vw, 20px);
+    top:20px;
+    right:20px;
     background:rgba(0,0,0,0.6);
-    padding:clamp(14px, 2.8vw, 30px) clamp(18px, 3vw, 40px);
-    border-radius:clamp(18px, 3vw, 35px);
-    text-align:center;
-    backdrop-filter:blur(20px);
-    z-index:20;
-    min-width:clamp(90px, 16vw, 180px);
+    padding:20px;
+    border-radius:20px;
 }
-
-#w-icon{
-    font-size:var(--weather-icon);
-    line-height:1;
-}
-
-#w-temp{
-    font-size:var(--weather-temp);
-    font-weight:900;
-    margin-top:8px;
-}
+#w-icon{ font-size:3rem; }
+#w-temp{ font-size:2rem; font-weight:bold; }
 
 /* STRÁNKY */
-.page{
-    display:none;
-    width:100vw;
-    height:100vh;
-    padding-top:var(--page-top);
-    padding-left:var(--page-side);
-    padding-right:var(--page-side);
-    padding-bottom:var(--bottom-pad);
-    overflow:auto;
-}
-
-.page.active{
-    display:block;
-}
+.page{ display:none; width:100%; height:100%; padding:60px 20px; }
+.page.active{ display:block; }
 
 /* DOMOV */
-.home-wrap{
-    width:min(100%, 1100px);
-    margin:0 auto;
-    text-align:center;
-    padding-top:clamp(20px, 4vh, 70px);
-}
+#clock{ font-size:var(--clock-size); text-align:center; }
+#date-sk{ text-align:center; font-size:var(--date-size); }
+#agenda-box{ text-align:center; margin-top:20px; }
 
-#clock{
-    font-size:var(--clock-size);
-    font-weight:800;
-    line-height:0.9;
-    letter-spacing:-0.04em;
-    text-shadow:0 10px 30px rgba(0,0,0,0.45);
-}
-
-#date-sk{
-    font-size:var(--date-size);
-    margin-top:clamp(8px, 2vh, 16px);
-    opacity:0.95;
-    text-transform:uppercase;
-}
-
-#agenda-box{
-    margin-top:clamp(20px, 4vh, 40px);
-    font-size:var(--agenda-size);
-    padding:0 clamp(4px, 2vw, 20px);
-    min-height:2em;
-}
-
-/* KARTY / MÉDIÁ / DOM / FLÓRA */
-.section-wrap{
-    width:min(100%, 1100px);
-    margin:0 auto;
-}
-
-.section-title{
-    text-align:center;
-    font-size:clamp(2rem, 5vw, 3rem);
-    font-weight:800;
-    margin:clamp(10px, 2vh, 20px) 0 clamp(20px, 3vh, 30px);
-}
-
-.media-grid,
-.dom-grid,
-.flora-grid,
-.table-grid{
+/* GRID */
+.media-grid{
     display:grid;
-    grid-template-columns:repeat(2, minmax(0, 1fr));
-    gap:clamp(14px, 2vw, 22px);
+    grid-template-columns:1fr 1fr;
+    gap:20px;
 }
-
 .card{
     background:var(--card);
-    border:1px solid var(--card-border);
-    border-radius:clamp(18px, 2.5vw, 26px);
-    padding:clamp(20px, 3vw, 34px);
-    font-size:clamp(1.1rem, 2.2vw, 1.6rem);
-    font-weight:700;
+    padding:20px;
+    border-radius:20px;
     text-align:center;
     cursor:pointer;
-    backdrop-filter:blur(10px);
-    transition:0.2s;
 }
-
-.card:active{
-    transform:scale(0.98);
-    background:rgba(255,255,255,0.16);
-}
-
-.stop-btn{
-    margin-top:clamp(18px, 2vh, 26px);
-    width:100%;
-    border:1px solid rgba(255,90,90,0.8);
-    background:rgba(255,60,60,0.18);
-    color:#fff;
-    border-radius:clamp(18px, 2.5vw, 25px);
-    padding:clamp(18px, 2.6vw, 24px);
-    font-size:clamp(1rem, 2vw, 1.5rem);
-    font-weight:800;
-    cursor:pointer;
-}
-
-#now-playing{
-    margin-top:14px;
-    text-align:center;
-    font-size:clamp(0.95rem, 1.8vw, 1.2rem);
-    opacity:0.85;
-}
-
-.info-card{
-    background:rgba(255,255,255,0.06);
-    border:1px solid rgba(255,255,255,0.1);
-    border-radius:clamp(18px, 2.5vw, 26px);
-    padding:clamp(18px, 2.5vw, 28px);
-    font-size:clamp(1rem, 2vw, 1.2rem);
-}
-
-/* TABUĽKA */
-.table-card{
-    background:rgba(255,255,255,0.06);
-    border:1px solid rgba(255,255,255,0.1);
-    border-radius:clamp(18px, 2.5vw, 26px);
-    padding:clamp(14px, 2vw, 20px);
-    overflow:auto;
-}
-
-.table-card table{
-    width:100%;
-    border-collapse:collapse;
-    font-size:clamp(0.9rem, 1.7vw, 1.05rem);
-}
-
-.table-card th,
-.table-card td{
-    padding:10px 8px;
-    border-bottom:1px solid rgba(255,255,255,0.08);
-    text-align:left;
-}
-
-.table-card th{
-    opacity:0.8;
-    font-weight:700;
-}
+.card:active{ transform:scale(0.95); }
 
 /* MENU */
 #nav{
     position:fixed;
-    left:0;
     bottom:0;
     width:100%;
     display:flex;
-    background:rgba(0,0,0,0.82);
-    backdrop-filter:blur(20px);
-    padding:12px 0 calc(12px + env(safe-area-inset-bottom));
-    z-index:100;
-    border-top:1px solid rgba(255,255,255,0.08);
+    background:rgba(0,0,0,0.8);
 }
-
 .nav-btn{
     flex:1;
     text-align:center;
-    color:rgba(255,255,255,0.52);
-    font-size:var(--nav-text);
-    cursor:pointer;
-    user-select:none;
-    transition:0.2s;
+    padding:10px;
+    color:#888;
 }
-
-.nav-btn span{
-    display:block;
-    font-size:var(--nav-icon);
-    margin-bottom:4px;
-    line-height:1;
-}
-
-.nav-btn.active-nav{
-    color:#fff;
-    transform:translateY(-8px);
-}
-
-.nav-btn:not(.active-nav){
-    opacity:0.92;
-}
-
-/* TABLET */
-@media (max-width: 1024px){
-    :root{
-        --clock-size: clamp(4rem, 18vw, 9rem);
-        --weather-icon: clamp(2.4rem, 10vw, 5rem);
-        --weather-temp: clamp(1.5rem, 6vw, 3rem);
-    }
-}
-
-/* MOBIL */
-@media (max-width: 700px){
-    :root{
-        --page-top: 16px;
-        --page-side: 14px;
-        --bottom-pad: calc(92px + env(safe-area-inset-bottom));
-    }
-
-    #weather-box{
-        top:12px;
-        right:12px;
-        padding:12px 16px;
-        min-width:82px;
-    }
-
-    .home-wrap{
-        padding-top:32px;
-    }
-
-    .media-grid,
-    .dom-grid,
-    .flora-grid,
-    .table-grid{
-        grid-template-columns:1fr;
-    }
-
-    .section-title{
-        margin-top:24px;
-    }
-
-    .nav-btn.active-nav{
-        transform:translateY(-5px);
-    }
-}
-
-/* VEĽKÝ DISPLAY / STENA */
-@media (min-width: 1400px){
-    :root{
-        --clock-size: clamp(9rem, 12vw, 15rem);
-        --date-size: clamp(2rem, 2vw, 2.8rem);
-        --agenda-size: clamp(1.8rem, 2vw, 2.6rem);
-        --weather-icon: clamp(5rem, 6vw, 7rem);
-        --weather-temp: clamp(3rem, 4vw, 4.5rem);
-    }
-}
+.nav-btn.active-nav{ color:#fff; }
 </style>
 </head>
 
 <body>
 
 <div id="bg"></div>
+
+<!-- 🔄 REFRESH -->
+<button id="refresh-btn" onclick="manualRefresh()">🔄</button>
 
 <!-- POČASIE -->
 <div id="weather-box">
@@ -333,253 +137,75 @@ body{
 
 <!-- DOMOV -->
 <div id="p1" class="page active">
-    <div class="home-wrap">
-        <div id="clock">00:00</div>
-        <div id="date-sk">...</div>
-        <div id="agenda-box"></div>
-    </div>
+    <div id="clock">00:00</div>
+    <div id="date-sk">...</div>
+    <div id="agenda-box"></div>
 </div>
 
 <!-- MÉDIÁ -->
 <div id="p2" class="page">
-    <div class="section-wrap">
-        <div class="section-title">Rádio</div>
-
-        <div class="media-grid">
-            <div class="card" onclick="playRadio('https://stream.funradio.sk/fun128.mp3','Fun Radio')">📻 Fun Radio</div>
-            <div class="card" onclick="playRadio('https://stream.vlna.sk/vlna128.mp3','Radio Vlna')">📻 Radio Vlna</div>
-            <div class="card" onclick="playRadio('https://stream.expres.sk/128.mp3','Expres')">📻 Expres</div>
-            <div class="card" onclick="playRadio('https://icecast.kiss.cz/kiss128.mp3','Radio Kiss CZ')">📻 Radio Kiss CZ</div>
-        </div>
-
-        <button class="stop-btn" onclick="stopRadio()">⏹ ZASTAVIŤ RADIO</button>
-        <div id="now-playing">Neprehráva sa nič</div>
+    <div class="media-grid">
+        <div class="card" onclick="playRadio('https://stream.funradio.sk/fun128.mp3')">Fun</div>
+        <div class="card" onclick="playRadio('https://stream.vlna.sk/vlna128.mp3')">Vlna</div>
+        <div class="card" onclick="playRadio('https://stream.expres.sk/128.mp3')">Expres</div>
+        <div class="card" onclick="playRadio('https://icecast.kiss.cz/kiss128.mp3')">Kiss</div>
     </div>
-</div>
-
-<!-- DOM -->
-<div id="p3" class="page">
-    <div class="section-wrap">
-        <div class="section-title">Dom</div>
-        <div class="dom-grid">
-            <div class="card">💡 Osvetlenie</div>
-            <div class="card">🔌 Zásuvky</div>
-            <div class="card">🎬 Scény</div>
-            <div class="card">📡 Stav systému</div>
-        </div>
-    </div>
-</div>
-
-<!-- FLÓRA -->
-<div id="p4" class="page">
-    <div class="section-wrap">
-        <div class="section-title">Flóra</div>
-        <div class="flora-grid">
-            <div class="info-card">🌱 Stav rastlín</div>
-            <div class="info-card">💧 Závlaha</div>
-        </div>
-    </div>
-</div>
-
-<!-- POČASIE STRÁNKA -->
-<div id="p5" class="page">
-    <div class="section-wrap">
-        <div class="section-title">Počasie</div>
-        <div class="info-card">Sem doplníme dennú a týždennú predpoveď.</div>
-    </div>
-</div>
-
-<!-- TABUĽKA -->
-<div id="p6" class="page">
-    <div class="section-wrap">
-        <div class="section-title">Tabuľka</div>
-        <div class="table-card">
-            <table>
-                <thead>
-                    <tr>
-                        <th>Deň</th>
-                        <th>Dátum</th>
-                        <th>Udalosť</th>
-                        <th>Práve dnes</th>
-                    </tr>
-                </thead>
-                <tbody id="sheet-table-body">
-                    <tr>
-                        <td colspan="4">Načítavam dáta…</td>
-                    </tr>
-                </tbody>
-            </table>
-        </div>
-    </div>
+    <button onclick="stopRadio()">STOP</button>
 </div>
 
 <!-- MENU -->
 <nav id="nav">
-    <div class="nav-btn active-nav" onclick="showPage('p1', this)">
-        <span>🏠</span>DOMOV
-    </div>
-    <div class="nav-btn" onclick="showPage('p2', this)">
-        <span>🎵</span>MÉDIÁ
-    </div>
-    <div class="nav-btn" onclick="showPage('p3', this)">
-        <span>📱</span>DOM
-    </div>
-    <div class="nav-btn" onclick="showPage('p4', this)">
-        <span>🌿</span>FLÓRA
-    </div>
-    <div class="nav-btn" onclick="showPage('p5', this)">
-        <span>🌦️</span>POČASIE
-    </div>
-    <div class="nav-btn" onclick="showPage('p6', this)">
-        <span>📋</span>TABUĽKA
-    </div>
+    <div class="nav-btn active-nav" onclick="showPage('p1',this)">DOM</div>
+    <div class="nav-btn" onclick="showPage('p2',this)">MEDIA</div>
 </nav>
 
-<audio id="audioPlayer"></audio>
+<audio id="audio"></audio>
 
 <script>
-const sheetId = '1wAMdy1V_88RKowxIeDsC8Q2ROgS8U44p2NeTfJBKyO8';
-const gid = '602623609';
-const audioPlayer = document.getElementById('audioPlayer');
+const audio=document.getElementById("audio");
 
-function updateClock() {
-    const now = new Date();
-
-    document.getElementById('clock').innerText =
-        now.getHours().toString().padStart(2, '0') + ":" +
-        now.getMinutes().toString().padStart(2, '0');
-
-    document.getElementById('date-sk').innerText =
-        now.toLocaleDateString('sk-SK', {
-            weekday: 'long',
-            day: 'numeric',
-            month: 'long'
-        });
+function showPage(id,btn){
+    document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+    document.querySelectorAll(".nav-btn").forEach(b=>b.classList.remove("active-nav"));
+    document.getElementById(id).classList.add("active");
+    btn.classList.add("active-nav");
 }
 
-function showPage(id, btn) {
-    document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active-nav'));
-
-    document.getElementById(id).classList.add('active');
-    btn.classList.add('active-nav');
+function updateClock(){
+    const n=new Date();
+    document.getElementById("clock").innerText=
+        n.getHours().toString().padStart(2,"0")+":"+
+        n.getMinutes().toString().padStart(2,"0");
 }
 
-async function updateWeather() {
-    try {
-        const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=48.3775&longitude=17.5883&current=temperature_2m,weather_code');
-        const data = await res.json();
-
-        document.getElementById('w-temp').innerText = Math.round(data.current.temperature_2m) + "°C";
-
-        const c = data.current.weather_code;
-        const hour = new Date().getHours();
-        const isNight = (hour >= 21 || hour < 6);
-
-        let i = "☀️";
-
-        if (c <= 3) i = isNight ? "🌙" : "☀️";
-        else if (c < 50) i = isNight ? "🌙☁️" : "🌤️";
-        else if (c < 70) i = "🌧️";
-        else i = "❄️";
-
-        document.getElementById('w-icon').innerText = i;
-    } catch (e) {
-        document.getElementById('w-temp').innerText = "ERR";
-    }
+async function updateWeather(){
+    let r=await fetch("https://api.open-meteo.com/v1/forecast?latitude=48.3&longitude=17.5&current=temperature_2m,weather_code");
+    let d=await r.json();
+    document.getElementById("w-temp").innerText=Math.round(d.current.temperature_2m)+"°C";
 }
 
-async function updateAgenda() {
-    try {
-        const res = await fetch(`https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&gid=${gid}`);
-        const txt = await res.text();
-        const json = JSON.parse(txt.substring(47).slice(0, -2));
-
-        const now = new Date();
-        let html = "";
-
-        json.table.rows.forEach(r => {
-            if (!r.c) return;
-
-            const val = String(r.c[1]?.f || r.c[1]?.v || "");
-
-            const today =
-                val.includes(`Date(${now.getFullYear()},${now.getMonth()},${now.getDate()}`) ||
-                val.includes(`${now.getDate()}.${now.getMonth()+1}.${now.getFullYear()}`);
-
-            if (!today) return;
-
-            const C = r.c[2]?.v || "";
-            const D = r.c[3]?.v || "";
-
-            html += `${D || C}`;
-        });
-
-        document.getElementById('agenda-box').innerHTML = html || "Žiadna dnešná udalosť";
-    } catch (e) {
-        document.getElementById('agenda-box').innerText = "❌ chyba";
-    }
+async function updateAgenda(){
+    document.getElementById("agenda-box").innerText="OK";
 }
 
-async function updateSheetTable() {
-    try {
-        const res = await fetch(`https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&gid=${gid}`);
-        const txt = await res.text();
-        const json = JSON.parse(txt.substring(47).slice(0, -2));
-
-        const tbody = document.getElementById('sheet-table-body');
-        let html = '';
-
-        json.table.rows.slice(0, 12).forEach(r => {
-            if (!r.c) return;
-
-            const day = r.c[0]?.v || '';
-            const date = r.c[1]?.f || r.c[1]?.v || '';
-            const event = r.c[2]?.v || '';
-            const today = r.c[3]?.v || '';
-
-            html += `
-                <tr>
-                    <td>${day}</td>
-                    <td>${date}</td>
-                    <td>${event}</td>
-                    <td>${today}</td>
-                </tr>
-            `;
-        });
-
-        tbody.innerHTML = html || `<tr><td colspan="4">Žiadne dáta</td></tr>`;
-    } catch (e) {
-        document.getElementById('sheet-table-body').innerHTML =
-            `<tr><td colspan="4">Nepodarilo sa načítať tabuľku</td></tr>`;
-    }
+function manualRefresh(){
+    updateWeather();
+    updateAgenda();
 }
 
-async function playRadio(url, name) {
-    try {
-        audioPlayer.src = url;
-        await audioPlayer.play();
-        document.getElementById('now-playing').innerText = `Hrá: ${name}`;
-    } catch (e) {
-        document.getElementById('now-playing').innerText = 'Prehrávanie sa nepodarilo spustiť';
-    }
+function playRadio(url){
+    audio.src=url;
+    audio.play();
 }
-
-function stopRadio() {
-    audioPlayer.pause();
-    audioPlayer.src = "";
-    document.getElementById('now-playing').innerText = 'Neprehráva sa nič';
+function stopRadio(){
+    audio.pause();
 }
 
 updateClock();
 updateWeather();
 updateAgenda();
-updateSheetTable();
 
-setInterval(updateClock, 1000);
-setInterval(updateWeather, 600000);
-setInterval(updateAgenda, 60000);
-setInterval(updateSheetTable, 120000);
+setInterval(updateClock,1000);
 </script>
 
 </body>
