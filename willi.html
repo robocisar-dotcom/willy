@@ -91,7 +91,31 @@ body{
     font-size:var(--weather-temp);
     font-weight:900;
     margin-top:8px;
+#forecast{
+    display:flex;
+    flex-direction:column;
+    margin-top:10px;
+    gap:6px;
 }
+
+.f-day{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-size:0.85rem;
+    opacity:0.9;
+    gap:10px;
+}
+
+.f-icon{
+    font-size:1.5rem;
+    line-height:1;
+}
+
+.f-temp{
+    font-size:0.95rem;
+    font-weight:700;
+}}
 
 /* STRÁNKY */
 .page{
@@ -347,6 +371,17 @@ body{
 <div id="weather-box">
     <div id="w-icon">--</div>
     <div id="w-temp">--°C</div>
+
+    <div id="forecast">
+        <div class="f-day">
+            <div class="f-icon">--</div>
+            <div class="f-temp">--°</div>
+        </div>
+        <div class="f-day">
+            <div class="f-icon">--</div>
+            <div class="f-temp">--°</div>
+        </div>
+    </div>
 </div>
 
 <!-- DOMOV -->
@@ -508,29 +543,7 @@ function showPage(id, btn) {
     btn.classList.add('active-nav');
 }
 
-async function updateWeather() {
-    try {
-        const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=48.3775&longitude=17.5883&current=temperature_2m,weather_code');
-        const data = await res.json();
-
-        document.getElementById('w-temp').innerText = Math.round(data.current.temperature_2m) + "°C";
-
-        const c = data.current.weather_code;
-        const hour = new Date().getHours();
-        const isNight = (hour >= 21 || hour < 6);
-
-        let i = "☀️";
-
-        if (c <= 3) i = isNight ? "🌙" : "☀️";
-        else if (c < 50) i = isNight ? "🌙☁️" : "🌤️";
-        else if (c < 70) i = "🌧️";
-        else i = "❄️";
-
-        document.getElementById('w-icon').innerText = i;
-    } catch (e) {
-        document.getElementById('w-temp').innerText = "ERR";
-    }
-}
+async function updateWeather
 
 async function updateAgenda() {
     try {
