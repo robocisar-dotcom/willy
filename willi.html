@@ -580,6 +580,11 @@ setInterval(updateClock, 1000);
 setInterval(updateWeather, 600000);
 setInterval(updateAgenda, 60000);
 setInterval(updateSheetTable, 120000);
+setInterval(() => {
+updateWeather();
+updateAgenda();
+updateSheetTable();
+}, 30000);
 </script>
 
 </body>
