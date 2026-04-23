@@ -71,6 +71,20 @@ body{
     z-index:20;
     min-width:clamp(90px, 16vw, 180px);
 }
+    #battery{
+    position:absolute;
+    top:clamp(12px, 2vw, 20px);
+    right:clamp(120px, 18vw, 220px); /* 🔥 vedľa počasia */
+
+    background:rgba(0,0,0,0.6);
+    padding:8px 14px;
+    border-radius:20px;
+
+    font-size:clamp(0.9rem, 2vw, 1.2rem);
+    backdrop-filter:blur(10px);
+
+    z-index:20;
+}
 /* FORECAST */
 #forecast{
     display:flex;
@@ -277,8 +291,10 @@ body{
 
 .nav-btn.active-nav{
     color:rgba(255,255,255,0.4);
-    transform:translateY(-4px); /* menší posun */
-    .nav-btn:active{
+    transform:translateY(-4px);
+}
+
+.nav-btn:active{
     transform:scale(0.95);
 }
 
@@ -295,6 +311,7 @@ body{
     }
 }
 
+/* MOBIL */
 /* MOBIL */
 @media (max-width: 700px){
     :root{
@@ -326,8 +343,9 @@ body{
     }
 
     .nav-btn.active-nav{
-    color:#fff;
-    transform:translateY(-8px);
+        color:#fff;
+        transform:translateY(-8px);
+    }
 }
 
 /* VEĽKÝ DISPLAY / STENA */
@@ -348,6 +366,9 @@ body{
 <div id="bg"></div>
 
 <!-- POČASIE -->
+    <div id="battery">
+    🔋 --%
+</div>
 <div id="weather-box">
     <div id="w-icon">--</div>
     <div id="w-temp">--°C</div>
@@ -489,7 +510,28 @@ function updateClock() {
             month: 'long'
         });
 }
+async function updateBattery(){
+    if(navigator.getBattery){
+        const battery = await navigator.getBattery();
 
+        const update = () => {
+            const level = Math.round(battery.level * 100);
+            const charging = battery.charging ? "⚡" : "";
+
+            document.getElementById('battery').innerText =
+                `🔋 ${level}% ${charging}`;
+        };
+
+        update();
+
+        battery.addEventListener('levelchange', update);
+        battery.addEventListener('chargingchange', update);
+    } else {
+        document.getElementById('battery').innerText = "🔋 N/A";
+    }
+}
+
+updateBattery();
 function showPage(id, btn) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active-nav'));
