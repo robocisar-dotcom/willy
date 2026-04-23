@@ -654,11 +654,17 @@ async function updateSheetTable() {
 
 async function playRadio(url, name) {
     try {
+        audioPlayer.pause();
+        audioPlayer.src = "";
+        audioPlayer.load();
+
         audioPlayer.src = url;
         await audioPlayer.play();
+
         document.getElementById('now-playing').innerText = `Hrá: ${name}`;
     } catch (e) {
-        document.getElementById('now-playing').innerText = 'Prehrávanie sa nepodarilo spustiť';
+        document.getElementById('now-playing').innerText =
+            '❌ Rádio blokované alebo nedostupné';
     }
 }
 
