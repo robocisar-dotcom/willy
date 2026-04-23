@@ -113,16 +113,23 @@ body{
 .home-wrap{
     width:min(100%, 1100px);
     margin:0 auto;
-    text-align:center;
-    padding-top:clamp(20px, 4vh, 70px);
-}
 
+    min-height:calc(100vh - 140px);
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+
+    text-align:center;
+    padding:20px;
+}
 #clock{
     font-size:var(--clock-size);
     font-weight:800;
     line-height:0.9;
     letter-spacing:-0.04em;
     text-shadow:0 10px 30px rgba(0,0,0,0.45);
+    margin:0;
 }
 
 #date-sk{
@@ -133,10 +140,11 @@ body{
 }
 
 #agenda-box{
-    margin-top:clamp(20px, 4vh, 40px);
+    margin-top:clamp(12px, 2vh, 28px);
     font-size:var(--agenda-size);
     padding:0 clamp(4px, 2vw, 20px);
     min-height:2em;
+    max-width:min(90vw, 900px);
 }
 
 /* KARTY / MÉDIÁ / DOM / FLÓRA */
