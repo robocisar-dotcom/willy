@@ -466,7 +466,32 @@ function updateClock() {
             month: 'long'
         });
 }
+async function updateBattery(){
+    const el = document.getElementById('battery');
 
+    if(navigator.getBattery){
+        try{
+            const battery = await navigator.getBattery();
+
+            const update = () => {
+                const level = Math.round(battery.level * 100);
+                const charging = battery.charging ? "⚡" : "";
+
+                el.innerText = `🔋 ${level}% ${charging}`;
+            };
+
+            update();
+
+            battery.addEventListener('levelchange', update);
+            battery.addEventListener('chargingchange', update);
+
+        } catch(e){
+            el.innerText = "🔋 ERR";
+        }
+    } else {
+        el.innerText = "🔋 N/A";
+    }
+}
 function showPage(id, btn) {
     document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
     document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active-nav'));
@@ -585,7 +610,7 @@ updateClock();
 updateWeather();
 updateAgenda();
 updateSheetTable();
-
+updateBattery();
 setInterval(updateClock, 1000);
 setInterval(updateWeather, 600000);
 setInterval(updateAgenda, 60000);
