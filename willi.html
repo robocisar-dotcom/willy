@@ -240,7 +240,7 @@ body{
 .nav-btn{
     flex:1;
     text-align:center;
-    color:rgba(255,255,255,0.52);
+    color:rgba(255,255,255,0.9);
     font-size:var(--nav-text);
     cursor:pointer;
     user-select:none;
@@ -248,8 +248,8 @@ body{
 }
 
 .nav-btn.active-nav{
-    color:#fff;
-    transform:translateY(-8px);
+    color:rgba(255,255,255,0.4);
+    transform:translateY(-4px); /* menší posun */
 }
 
 .nav-btn:not(.active-nav){
@@ -296,8 +296,8 @@ body{
     }
 
     .nav-btn.active-nav{
-        transform:translateY(-5px);
-    }
+    color:#fff;
+    transform:translateY(-8px);
 }
 
 /* VEĽKÝ DISPLAY / STENA */
