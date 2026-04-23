@@ -548,8 +548,32 @@ body{
         now.getHours().toString().padStart(2, '0') + ":" +
         now.getMinutes().toString().padStart(2, '0');
 }
+async function updateWeather() {
+    try {
+        const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=48.3775&longitude=17.5883&current=temperature_2m,weather_code');
+        const data = await res.json();
 
+        const temp = Math.round(data.current.temperature_2m);
+        document.getElementById('w-temp').innerText = temp + "°C";
+
+        const code = data.current.weather_code;
+
+        let icon = "☀️";
+        if (code <= 3) icon = "☀️";
+        else if (code < 50) icon = "🌤️";
+        else if (code < 70) icon = "🌧️";
+        else icon = "❄️";
+
+        document.getElementById('w-icon').innerText = icon;
+
+    } catch (e) {
+        document.getElementById('w-temp').innerText = "ERR";
+    }
+}
 updateClock();
 setInterval(updateClock, 1000);
+updateWeather();
+setInterval(updateWeather, 600000);
+</script>
 </body>
 </html>
