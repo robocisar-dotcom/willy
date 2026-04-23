@@ -512,9 +512,9 @@ body{
 </nav>
 
 <audio id="audioPlayer"></audio>
-
 <script>
 console.log("WILLI BEZI");
+
 const sheetId = '1wAMdy1V_88RKowxIeDsC8Q2ROgS8U44p2NeTfJBKyO8';
 const gid = '602623609';
 const audioPlayer = document.getElementById('audioPlayer');
@@ -534,25 +534,24 @@ function updateClock() {
         });
 }
 
-async function updateBattery(){
+async function updateBattery() {
     const el = document.getElementById('battery');
+    if (!el) return;
 
-    if(navigator.getBattery){
-        try{
+    if (navigator.getBattery) {
+        try {
             const battery = await navigator.getBattery();
 
             const update = () => {
                 const level = Math.round(battery.level * 100);
                 const charging = battery.charging ? "⚡" : "";
-
                 el.innerText = `🔋 ${level}% ${charging}`;
             };
 
             update();
             battery.addEventListener('levelchange', update);
             battery.addEventListener('chargingchange', update);
-
-        } catch(e){
+        } catch (e) {
             el.innerText = "🔋 ERR";
         }
     } else {
@@ -570,12 +569,12 @@ function showPage(id, btn) {
     const weather = document.getElementById('weather-box');
     const battery = document.getElementById('battery');
 
-    if(id === 'p1'){
-        weather.style.display = 'block';
-        battery.style.display = 'block';
+    if (id === 'p1') {
+        if (weather) weather.style.display = 'block';
+        if (battery) battery.style.display = 'block';
     } else {
-        weather.style.display = 'none';
-        battery.style.display = 'none';
+        if (weather) weather.style.display = 'none';
+        if (battery) battery.style.display = 'none';
     }
 }
 
@@ -584,8 +583,12 @@ async function updateWeather() {
         const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=48.3775&longitude=17.5883&current=temperature_2m,weather_code&daily=weather_code,temperature_2m_max&timezone=auto');
         const data = await res.json();
 
-        document.getElementById('w-temp').innerText =
-            Math.round(data.current.temperature_2m) + "°C";
+        const wTemp = document.getElementById('w-temp');
+        const wIcon = document.getElementById('w-icon');
+
+        if (wTemp) {
+            wTemp.innerText = Math.round(data.current.temperature_2m) + "°C";
+        }
 
         const getIcon = (code, night = false) => {
             if (code <= 3) return night ? "🌙" : "☀️";
@@ -597,8 +600,9 @@ async function updateWeather() {
         const hour = new Date().getHours();
         const isNight = (hour >= 21 || hour < 6);
 
-        document.getElementById('w-icon').innerText =
-            getIcon(data.current.weather_code, isNight);
+        if (wIcon) {
+            wIcon.innerText = getIcon(data.current.weather_code, isNight);
+        }
 
         const icons = document.querySelectorAll('.f-icon');
         const temps = document.querySelectorAll('.f-temp');
@@ -609,9 +613,10 @@ async function updateWeather() {
                 temps[i - 1].innerText = Math.round(data.daily.temperature_2m_max[i]) + "°";
             }
         }
-
     } catch (e) {
-        document.getElementById('w-temp').innerText = "ERR";
+        const wTemp = document.getElementById('w-temp');
+        if (wTemp) wTemp.innerText = "ERR";
+        console.error("Weather error:", e);
     }
 }
 
@@ -621,24 +626,105 @@ async function updateAgenda() {
         const txt = await res.text();
         const json = JSON.parse(txt.substring(47).slice(0, -2));
 
+        const now = new Date();
+        const todayDay = now.getDate();
+        const todayMonth = now.getMonth() + 1;
+        const todayYear = now.getFullYear();
+
         let html = "";
 
         json.table.rows.forEach(r => {
             if (!r.c) return;
 
+            const dateCell = r.c[1];
             const eventC = r.c[2]?.v || "";
             const eventD = r.c[3]?.v || "";
+            if (!dateCell) return;
 
-            if (eventC) html += `<div>📌 ${eventC}</div>`;
-            if (eventD) html += `<div>✨ ${eventD}</div>`;
+            let isToday = false;
+
+            if (dateCell.f) {
+                const clean = String(dateCell.f).replace(/\s+/g, "");
+                const m = clean.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+                if (m) {
+                    const d = parseInt(m[1], 10);
+                    const mo = parseInt(m[2], 10);
+                    const y = parseInt(m[3], 10);
+                    if (d === todayDay && mo === todayMonth && y === todayYear) {
+                        isToday = true;
+                    }
+                }
+            }
+
+            if (!isToday && typeof dateCell.v === "string" && dateCell.v.startsWith("Date(")) {
+                const m = dateCell.v.match(/Date\((\d+),(\d+),(\d+)/);
+                if (m) {
+                    const y = parseInt(m[1], 10);
+                    const mo = parseInt(m[2], 10) + 1;
+                    const d = parseInt(m[3], 10);
+                    if (d === todayDay && mo === todayMonth && y === todayYear) {
+                        isToday = true;
+                    }
+                }
+            }
+
+            if (!isToday) return;
+
+            if (eventC) {
+                html += `<div class="agenda-item">📌 ${eventC}</div>`;
+            }
+
+            if (eventD) {
+                html += `<div class="agenda-detail">✨ ${eventD}</div>`;
+            }
         });
 
-        document.getElementById('agenda-box').innerHTML = html || "nič";
+        document.getElementById('agenda-box').innerHTML = html || "Žiadna dnešná udalosť";
     } catch (e) {
         document.getElementById('agenda-box').innerText = "❌ chyba";
-        console.error(e);
+        console.error("Agenda error:", e);
     }
 }
+
+async function updateSheetTable() {
+    try {
+        const res = await fetch(`https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&gid=${gid}`);
+        const txt = await res.text();
+        const json = JSON.parse(txt.substring(47).slice(0, -2));
+
+        const tbody = document.getElementById('sheet-table-body');
+        if (!tbody) return;
+
+        let html = '';
+
+        json.table.rows.slice(0, 12).forEach(r => {
+            if (!r.c) return;
+
+            const day = r.c[0]?.v || '';
+            const date = r.c[1]?.f || r.c[1]?.v || '';
+            const event = r.c[2]?.v || '';
+            const today = r.c[3]?.v || '';
+
+            html += `
+                <tr>
+                    <td>${day}</td>
+                    <td>${date}</td>
+                    <td>${event}</td>
+                    <td>${today}</td>
+                </tr>
+            `;
+        });
+
+        tbody.innerHTML = html || `<tr><td colspan="4">Žiadne dáta</td></tr>`;
+    } catch (e) {
+        const tbody = document.getElementById('sheet-table-body');
+        if (tbody) {
+            tbody.innerHTML = `<tr><td colspan="4">Nepodarilo sa načítať tabuľku</td></tr>`;
+        }
+        console.error("Table error:", e);
+    }
+}
+
 async function playRadio(url, name) {
     try {
         audioPlayer.pause();
@@ -650,8 +736,8 @@ async function playRadio(url, name) {
 
         document.getElementById('now-playing').innerText = `Hrá: ${name}`;
     } catch (e) {
-        document.getElementById('now-playing').innerText =
-            '❌ Rádio blokované alebo nedostupné';
+        document.getElementById('now-playing').innerText = '❌ Rádio blokované alebo nedostupné';
+        console.error("Radio error:", e);
     }
 }
 
@@ -671,6 +757,8 @@ setInterval(updateClock, 1000);
 setInterval(updateWeather, 600000);
 setInterval(updateAgenda, 60000);
 setInterval(updateSheetTable, 120000);
+</script>
+
 </script>
 
 </body>
