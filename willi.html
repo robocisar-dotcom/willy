@@ -496,6 +496,14 @@ function showPage(id, btn) {
 
     document.getElementById(id).classList.add('active');
     btn.classList.add('active-nav');
+
+    // 🔥 POČASIE LEN NA DOMOV
+    const weather = document.getElementById('weather-box');
+    if(id === 'p1'){
+        weather.style.display = 'block';
+    } else {
+        weather.style.display = 'none';
+    }
 }
 
 async function updateWeather() {
