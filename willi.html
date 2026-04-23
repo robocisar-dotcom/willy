@@ -27,7 +27,18 @@
     --page-side: clamp(14px, 3vw, 28px);
     --bottom-pad: calc(100px + env(safe-area-inset-bottom));
 }
+.agenda-item{
+    font-size: 2.2rem;
+    font-weight: 600;
+    margin: 10px 0;
+    color: #fff;
+}
 
+.agenda-detail{
+    font-size: 1.3rem;
+    opacity: 0.8;
+    margin-bottom: 6px;
+}
 *{
     box-sizing:border-box;
     -webkit-tap-highlight-color:transparent;
@@ -567,18 +578,7 @@ function showPage(id, btn) {
         battery.style.display = 'none';
     }
 }
-.agenda-item{
-    font-size: 2.2rem;
-    font-weight: 600;
-    margin: 10px 0;
-    color: #fff;
-}
 
-.agenda-detail{
-    font-size: 1.3rem;
-    opacity: 0.8;
-    margin-bottom: 6px;
-}
 async function updateWeather() {
     try {
         const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=48.3775&longitude=17.5883&current=temperature_2m,weather_code&daily=weather_code,temperature_2m_max&timezone=auto');
