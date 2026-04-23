@@ -658,6 +658,8 @@ async function playRadio(url, name) {
         audioPlayer.src = "";
         audioPlayer.load();
 
+        audioPlayer.crossOrigin = "anonymous"; // 🔥 PRIDAJ TOTO
+
         audioPlayer.src = url;
         await audioPlayer.play();
 
