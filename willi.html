@@ -620,66 +620,24 @@ async function updateAgenda() {
         const txt = await res.text();
         const json = JSON.parse(txt.substring(47).slice(0, -2));
 
-        const now = new Date();
-        const todayDay = now.getDate();
-        const todayMonth = now.getMonth() + 1;
-        const todayYear = now.getFullYear();
-
         let html = "";
 
         json.table.rows.forEach(r => {
             if (!r.c) return;
 
-            const dateCell = r.c[1];          // B = dátum
-            const eventC = r.c[2]?.v || "";   // C = udalosť
-            const eventD = r.c[3]?.v || "";   // D = plávajúca udalosť
-            if (!dateCell) return;
+            const eventC = r.c[2]?.v || "";
+            const eventD = r.c[3]?.v || "";
 
-            let isToday = false;
-
-            if (dateCell.f) {
-                const clean = String(dateCell.f).replace(/\s+/g, "");
-                const m = clean.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
-                if (m) {
-                    const d = parseInt(m[1], 10);
-                    const mo = parseInt(m[2], 10);
-                    const y = parseInt(m[3], 10);
-                    if (d === todayDay && mo === todayMonth && y === todayYear) {
-                        isToday = true;
-                    }
-                }
-            }
-
-            if (!isToday && typeof dateCell.v === "string" && dateCell.v.startsWith("Date(")) {
-                const m = dateCell.v.match(/Date\((\d+),(\d+),(\d+)/);
-                if (m) {
-                    const y = parseInt(m[1], 10);
-                    const mo = parseInt(m[2], 10) + 1;
-                    const d = parseInt(m[3], 10);
-                    if (d === todayDay && mo === todayMonth && y === todayYear) {
-                        isToday = true;
-                    }
-                }
-            }
-
-            if (!isToday) return;
-
-            if (eventC) {
-                html += `<div class="agenda-item">📌 ${eventC}</div>`;
-            }
-
-            if (eventD) {
-                html += `<div class="agenda-detail">✨ ${eventD}</div>`;
-            }
+            if (eventC) html += `<div>📌 ${eventC}</div>`;
+            if (eventD) html += `<div>✨ ${eventD}</div>`;
         });
 
-        document.getElementById('agenda-box').innerHTML = html || "Žiadna dnešná udalosť";
+        document.getElementById('agenda-box').innerHTML = html || "nič";
     } catch (e) {
         document.getElementById('agenda-box').innerText = "❌ chyba";
-        console.error("Agenda error:", e);
+        console.error(e);
     }
 }
-
 async function playRadio(url, name) {
     try {
         audioPlayer.pause();
