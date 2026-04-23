@@ -487,10 +487,8 @@ body{
             <table>
                 <thead>
                     <tr>
-                        <th>Deň</th>
                         <th>Dátum</th>
-                        <th>Udalosť</th>
-                        <th>Práve dnes</th>
+<th>Poznámka</th>
                     </tr>
                 </thead>
                 <tbody id="sheet-table-body">
@@ -738,25 +736,21 @@ async function updateSheetTable() {
 
         let html = '';
 
-     json.table.rows.slice(0, 12).forEach((r, index) => {
+    json.table.rows.forEach((r, index) => {
             if (!r.c) return;
 
-            const day = r.c[0]?.v || '';
             const date = r.c[1]?.f || r.c[1]?.v || '';
-            const event = r.c[2]?.v || '';
-            const today = r.c[3]?.v || '';
+const note = r.c[3]?.v || '';
 
-            html += `
-                <tr>
-                    <td>${day}</td>
-                    <td>${date}</td>
-                    <td>${event}</td>
-                    <td contenteditable="true"
-    onblur="saveCell(${index+1}, this.innerText)">
-    ${today}
-</td>
-                </tr>
-            `;
+           html += `
+<tr>
+    <td>${date}</td>
+    <td contenteditable="true"
+        onblur="saveCell(${index+1}, this.innerText)">
+        ${note}
+    </td>
+</tr>
+`;
         });
 
         tbody.innerHTML = html || `<tr><td colspan="4">Žiadne dáta</td></tr>`;
