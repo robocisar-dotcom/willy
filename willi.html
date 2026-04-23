@@ -28,9 +28,20 @@
     --bottom-pad: calc(100px + env(safe-area-inset-bottom));
 }
 
-*{
-    box-sizing:border-box;
-    -webkit-tap-highlight-color:transparent;
+/* 🔋 BATÉRIA (TERAZ JE SPRÁVNE) */
+#battery{
+    position:absolute;
+    top:20px;
+    left:20px;
+
+    background:rgba(0,0,0,0.6);
+    padding:8px 14px;
+    border-radius:20px;
+
+    font-size:clamp(0.9rem, 2vw, 1.2rem);
+    backdrop-filter:blur(10px);
+    z-index:20;
+}
 }
 
 html, body{
@@ -581,6 +592,7 @@ setInterval(updateWeather, 600000);
 setInterval(updateAgenda, 60000);
 setInterval(updateSheetTable, 120000);
 </script>
+
 
 </body>
 </html>
