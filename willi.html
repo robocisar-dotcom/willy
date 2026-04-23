@@ -630,38 +630,33 @@ async function updateAgenda() {
         json.table.rows.forEach(r => {
             if (!r.c) return;
 
-            const dateCell = r.c[1]; // stĺpec B = dátum
-            const eventC = r.c[2]?.v || ""; // stĺpec C = udalosť
-            const eventD = r.c[3]?.v || ""; // stĺpec D = detail
+            const dateCell = r.c[1];          // B = dátum
+            const eventC = r.c[2]?.v || "";   // C = udalosť
+            const eventD = r.c[3]?.v || "";   // D = plávajúca udalosť
             if (!dateCell) return;
 
             let isToday = false;
 
-            // 1. Google Sheets dátum typu Date(2026,3,23)
-            if (typeof dateCell.v === "string" && dateCell.v.startsWith("Date(")) {
-                const m = dateCell.v.match(/Date\((\d+),(\d+),(\d+)/);
+            if (dateCell.f) {
+                const clean = String(dateCell.f).replace(/\s+/g, "");
+                const m = clean.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
                 if (m) {
-                    const y = parseInt(m[1], 10);
-                    const mo = parseInt(m[2], 10) + 1;
-                    const d = parseInt(m[3], 10);
-
-                    if (y === todayYear && mo === todayMonth && d === todayDay) {
+                    const d = parseInt(m[1], 10);
+                    const mo = parseInt(m[2], 10);
+                    const y = parseInt(m[3], 10);
+                    if (d === todayDay && mo === todayMonth && y === todayYear) {
                         isToday = true;
                     }
                 }
             }
 
-            // 2. Formátovaný text napr. 23.4.2026 alebo 23. 4. 2026
-            if (!isToday && dateCell.f) {
-                const clean = String(dateCell.f).replace(/\s+/g, "");
-                const m = clean.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
-
+            if (!isToday && typeof dateCell.v === "string" && dateCell.v.startsWith("Date(")) {
+                const m = dateCell.v.match(/Date\((\d+),(\d+),(\d+)/);
                 if (m) {
-                    const d = parseInt(m[1], 10);
-                    const mo = parseInt(m[2], 10);
-                    const y = parseInt(m[3], 10);
-
-                    if (y === todayYear && mo === todayMonth && d === todayDay) {
+                    const y = parseInt(m[1], 10);
+                    const mo = parseInt(m[2], 10) + 1;
+                    const d = parseInt(m[3], 10);
+                    if (d === todayDay && mo === todayMonth && y === todayYear) {
                         isToday = true;
                     }
                 }
@@ -672,8 +667,9 @@ async function updateAgenda() {
             if (eventC) {
                 html += `<div class="agenda-item">📌 ${eventC}</div>`;
             }
+
             if (eventD) {
-                html += `<div class="agenda-detail">⏰ ${eventD}</div>`;
+                html += `<div class="agenda-detail">✨ ${eventD}</div>`;
             }
         });
 
@@ -681,40 +677,6 @@ async function updateAgenda() {
     } catch (e) {
         document.getElementById('agenda-box').innerText = "❌ chyba";
         console.error("Agenda error:", e);
-    }
-}
-
-async function updateSheetTable() {
-    try {
-        const res = await fetch(`https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&gid=${gid}`);
-        const txt = await res.text();
-        const json = JSON.parse(txt.substring(47).slice(0, -2));
-
-        const tbody = document.getElementById('sheet-table-body');
-        let html = '';
-
-        json.table.rows.slice(0, 12).forEach(r => {
-            if (!r.c) return;
-
-            const day = r.c[0]?.v || '';
-            const date = r.c[1]?.f || r.c[1]?.v || '';
-            const event = r.c[2]?.v || '';
-            const today = r.c[3]?.v || '';
-
-            html += `
-                <tr>
-                    <td>${day}</td>
-                    <td>${date}</td>
-                    <td>${event}</td>
-                    <td>${today}</td>
-                </tr>
-            `;
-        });
-
-        tbody.innerHTML = html || `<tr><td colspan="4">Žiadne dáta</td></tr>`;
-    } catch (e) {
-        document.getElementById('sheet-table-body').innerHTML =
-            `<tr><td colspan="4">Nepodarilo sa načítať tabuľku</td></tr>`;
     }
 }
 
