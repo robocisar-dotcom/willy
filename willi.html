@@ -237,14 +237,14 @@ body{
     z-index:100;
     border-top:1px solid rgba(255,255,255,0.08);
 }
-
-color:rgba(255,255,255,0.52);
-
-.nav-btn span{
-    display:block;
-    font-size:var(--nav-icon);
-    margin-bottom:4px;
-    line-height:1;
+.nav-btn{
+    flex:1;
+    text-align:center;
+    color:rgba(255,255,255,0.52);
+    font-size:var(--nav-text);
+    cursor:pointer;
+    user-select:none;
+    transition:0.2s;
 }
 
 .nav-btn.active-nav{
