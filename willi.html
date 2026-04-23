@@ -586,6 +586,15 @@ document.getElementById("refresh-btn").onclick = () => {
     updateAgenda();
     updateSheetTable();
 </script>
+updateClock();
+updateWeather();
+updateAgenda();
+updateSheetTable();
+
+setInterval(updateClock, 1000);
+setInterval(updateWeather, 600000);
+setInterval(updateAgenda, 60000);
+setInterval(updateSheetTable, 120000);
 
 </body>
 </html>
