@@ -71,7 +71,28 @@ body{
     z-index:20;
     min-width:clamp(90px, 16vw, 180px);
 }
+/* FORECAST */
+#forecast{
+    display:flex;
+    justify-content:space-between;
+    margin-top:10px;
+    gap:10px;
+}
 
+.f-day{
+    flex:1;
+    text-align:center;
+    font-size:0.8rem;
+    opacity:0.9;
+}
+
+.f-icon{
+    font-size:1.5rem;
+}
+
+.f-temp{
+    font-size:0.9rem;
+}
 #w-icon{
     font-size:var(--weather-icon);
     line-height:1;
@@ -330,6 +351,16 @@ body{
     <div id="w-icon">--</div>
     <div id="w-temp">--°C</div>
 </div>
+    <div id="forecast">
+    <div class="f-day">
+        <div class="f-icon">--</div>
+        <div class="f-temp">--°</div>
+    </div>
+    <div class="f-day">
+        <div class="f-icon">--</div>
+        <div class="f-temp">--°</div>
+    </div>
+</div>
 
 <!-- DOMOV -->
 <div id="p1" class="page active">
@@ -467,23 +498,34 @@ function showPage(id, btn) {
 
 async function updateWeather() {
     try {
-        const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=48.3775&longitude=17.5883&current=temperature_2m,weather_code');
+        const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=48.3775&longitude=17.5883&daily=weather_code,temperature_2m_max&current=temperature_2m,weather_code&timezone=auto');
         const data = await res.json();
 
+        // aktuálne počasie
         document.getElementById('w-temp').innerText = Math.round(data.current.temperature_2m) + "°C";
 
-        const c = data.current.weather_code;
+        const getIcon = (c, night=false) => {
+            if (c <= 3) return night ? "🌙" : "☀️";
+            if (c < 50) return "🌤️";
+            if (c < 70) return "🌧️";
+            return "❄️";
+        };
+
         const hour = new Date().getHours();
         const isNight = (hour >= 21 || hour < 6);
 
-        let i = "☀️";
+        document.getElementById('w-icon').innerText =
+            getIcon(data.current.weather_code, isNight);
 
-        if (c <= 3) i = isNight ? "🌙" : "☀️";
-        else if (c < 50) i = isNight ? "🌙☁️" : "🌤️";
-        else if (c < 70) i = "🌧️";
-        else i = "❄️";
+        // forecast (2 dni)
+        const icons = document.querySelectorAll('.f-icon');
+        const temps = document.querySelectorAll('.f-temp');
 
-        document.getElementById('w-icon').innerText = i;
+        for(let i = 1; i <= 2; i++){
+            icons[i-1].innerText = getIcon(data.daily.weather_code[i]);
+            temps[i-1].innerText = Math.round(data.daily.temperature_2m_max[i]) + "°";
+        }
+
     } catch (e) {
         document.getElementById('w-temp').innerText = "ERR";
     }
