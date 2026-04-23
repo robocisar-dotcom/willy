@@ -326,7 +326,6 @@ body{
 <div id="bg"></div>
 
 <!-- POČASIE -->
-<button id="refresh-btn">🔄</button>
 <div id="weather-box">
     <div id="w-icon">--</div>
     <div id="w-temp">--°C</div>
@@ -581,20 +580,7 @@ setInterval(updateClock, 1000);
 setInterval(updateWeather, 600000);
 setInterval(updateAgenda, 60000);
 setInterval(updateSheetTable, 120000);
-document.getElementById("refresh-btn").onclick = () => {
-    updateWeather();
-    updateAgenda();
-    updateSheetTable();
 </script>
-updateClock();
-updateWeather();
-updateAgenda();
-updateSheetTable();
-
-setInterval(updateClock, 1000);
-setInterval(updateWeather, 600000);
-setInterval(updateAgenda, 60000);
-setInterval(updateSheetTable, 120000);
 
 </body>
 </html>
