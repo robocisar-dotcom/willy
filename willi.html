@@ -1,6 +1,22 @@
 <!DOCTYPE html>
 <html lang="sk">
-<head>
+<head>async function playRadio(url, name) {
+    try {
+        audioPlayer.pause();
+        audioPlayer.src = "";
+        audioPlayer.load();
+
+        audioPlayer.crossOrigin = "anonymous"; // 🔥 PRIDAJ TOTO
+
+        audioPlayer.src = url;
+        await audioPlayer.play();
+
+        document.getElementById('now-playing').innerText = `Hrá: ${name}`;
+    } catch (e) {
+        document.getElementById('now-playing').innerText =
+            '❌ Rádio blokované alebo nedostupné';
+    }
+}
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Willy Dashboard</title>
@@ -419,6 +435,7 @@ body{
     <div class="section-wrap">
         <div class="section-title">Dom</div>
         <div class="dom-grid">
+            <div class="card" onclick="openGoogleHome()">🏠 Google Home</div>
             <div class="card">💡 Osvetlenie</div>
             <div class="card">🔌 Zásuvky</div>
             <div class="card">🎬 Scény</div>
@@ -690,6 +707,9 @@ updateWeather();
 updateAgenda();
 updateSheetTable();
 }, 30000);
+function openGoogleHome(){
+ window.open("https://home.google.com", "_blank");
+}
 </script>
 
 </body>
