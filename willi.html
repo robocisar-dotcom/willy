@@ -1,6 +1,20 @@
 <!DOCTYPE html>
 <html lang="sk">
-<head>
+<head>async function saveCell(row, value){
+    try{
+        await fetch("https://script.google.com/macros/s/AKfycbzBloze5aJ9fMtde-tlQXQMmi6yfFYayS9B08ZFML0tbGnxz3mbQVFwh92VUgebZ7xo/exec", {
+            method: "POST",
+            body: JSON.stringify({
+                row: row,
+                value: value
+            })
+        });
+
+        console.log("uložené");
+    }catch(e){
+        console.error("chyba ukladania", e);
+    }
+}
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
 <title>Willy Dashboard</title>
@@ -542,6 +556,19 @@ async function saveCell(row, value){
                 value: value
             })
         });
+    }catch(e){
+        console.error("chyba ukladania", e);
+    }
+}
+    async function saveCell(row, value){
+    try{
+        await fetch("https://script.google.com/macros/s/AKfycbzBloze5aJ9fMtde-tlQXQMmi6yfFYayS9B08ZFML0tbGnxz3mbQVFwh92VUgebZ7xo/exec", {
+            method: "POST",
+            body: JSON.stringify({
+                row: row,
+                value: value
+            })
+        });
 
         console.log("uložené");
     }catch(e){
@@ -711,7 +738,7 @@ async function updateSheetTable() {
 
         let html = '';
 
-        json.table.rows.slice(0, 12).forEach(r => {
+     json.table.rows.slice(0, 12).forEach((r, index) => {
             if (!r.c) return;
 
             const day = r.c[0]?.v || '';
@@ -724,7 +751,10 @@ async function updateSheetTable() {
                     <td>${day}</td>
                     <td>${date}</td>
                     <td>${event}</td>
-                    <td>${today}</td>
+                    <td contenteditable="true"
+    onblur="saveCell(${index+1}, this.innerText)">
+    ${today}
+</td>
                 </tr>
             `;
         });
