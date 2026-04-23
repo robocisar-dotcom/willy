@@ -1,27 +1,20 @@
 <!DOCTYPE html>
 <html lang="sk">
-<head>async function playRadio(url, name) {
-    try {
-        audioPlayer.pause();
-        audioPlayer.src = "";
-        audioPlayer.load();
-
-        audioPlayer.crossOrigin = "anonymous"; // 🔥 PRIDAJ TOTO
-
-        audioPlayer.src = url;
-        await audioPlayer.play();
-
-        document.getElementById('now-playing').innerText = `Hrá: ${name}`;
-    } catch (e) {
-        document.getElementById('now-playing').innerText =
-            '❌ Rádio blokované alebo nedostupné';
-    }
-}
+<head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+
+<meta name="viewport"
+content="width=device-width, initial-scale=1.0, maximum-scale=1.0,
+user-scalable=no, viewport-fit=cover">
+
 <title>Willy Dashboard</title>
 
 <style>
+/* TU MÁŠ SVOJ CELÝ CSS KÓD */
+/* nič iné sem nepatrí */
+</style>
+
+</head>
 :root{
     --bg: #000;
     --text: #fff;
