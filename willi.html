@@ -74,15 +74,16 @@ body{
 /* FORECAST */
 #forecast{
     display:flex;
-    justify-content:space-between;
+    flex-direction:column; /* 🔥 POD SEBA */
     margin-top:10px;
-    gap:10px;
+    gap:6px;
 }
 
 .f-day{
-    flex:1;
-    text-align:center;
-    font-size:0.8rem;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    font-size:0.85rem;
     opacity:0.9;
 }
 
@@ -350,7 +351,7 @@ body{
 <div id="weather-box">
     <div id="w-icon">--</div>
     <div id="w-temp">--°C</div>
-</div>
+    
     <div id="forecast">
     <div class="f-day">
         <div class="f-icon">--</div>
