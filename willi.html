@@ -199,6 +199,22 @@ body{
     max-width:min(90vw, 900px);
 }
 
+/* jednotlivé udalosti */
+.agenda-item{
+    text-align:left;
+    margin-bottom:6px;
+    font-weight:600;
+    color:#fff;
+}
+
+/* jemnejší detail (ak použiješ) */
+.agenda-detail{
+    text-align:left;
+    font-size:0.8em;
+    opacity:0.8;
+    margin-bottom:4px;
+}
+
 /* KARTY / MÉDIÁ / DOM / FLÓRA */
 .section-wrap{
     width:min(100%, 1100px);
@@ -666,34 +682,53 @@ async function updateAgenda() {
         const json = JSON.parse(txt.substring(47).slice(0, -2));
 
         const now = new Date();
-        const todayDay = now.getDate();
-        const todayMonth = now.getMonth() + 1;
-        const todayYear = now.getFullYear();
+        const d = now.getDate();
+        const m = now.getMonth() + 1;
+        const y = now.getFullYear();
 
         let html = "";
 
         json.table.rows.forEach(r => {
             if (!r.c) return;
 
-            const dateCell = r.c[1];
-            const eventC = r.c[2]?.v || "";
-            const eventD = r.c[3]?.v || "";
-            if (!dateCell) return;
+            const date = r.c[1]?.f || r.c[1]?.v || "";
+            const note = r.c[3]?.v || "";
 
-            let isToday = false;
+            if (!date || !note) return;
 
-            if (dateCell.f) {
-                const clean = String(dateCell.f).replace(/\s+/g, "");
-                const m = clean.match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
-                if (m) {
-                    const d = parseInt(m[1], 10);
-                    const mo = parseInt(m[2], 10);
-                    const y = parseInt(m[3], 10);
-                    if (d === todayDay && mo === todayMonth && y === todayYear) {
-                        isToday = true;
-                    }
-                }
+            // porovnanie dátumu
+            const match = date.replace(/\s+/g, "")
+                .match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
+
+            if (!match) return;
+
+            const dd = parseInt(match[1]);
+            const mm = parseInt(match[2]);
+            const yy = parseInt(match[3]);
+
+            if (dd === d && mm === m && yy === y) {
+
+                // ikonky
+                let icon = "📌";
+                const text = note.toLowerCase();
+
+                if (text.includes("naroden")) icon = "🎂";
+                else if (text.includes("stretn")) icon = "❤️";
+                else if (text.includes("nákup")) icon = "🛒";
+                else if (text.includes("dovolen")) icon = "✈️";
+
+                html += `<div class="agenda-item">${icon} ${note}</div>`;
             }
+        });
+
+        document.getElementById('agenda-box').innerHTML =
+            html || "Dnes nič naplánované";
+
+    } catch (e) {
+        document.getElementById('agenda-box').innerText = "❌ chyba";
+        console.error(e);
+    }
+}
 
             if (!isToday && typeof dateCell.v === "string" && dateCell.v.startsWith("Date(")) {
                 const m = dateCell.v.match(/Date\((\d+),(\d+),(\d+)/);
