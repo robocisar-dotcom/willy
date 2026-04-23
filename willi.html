@@ -57,40 +57,9 @@ body{
     filter:brightness(0.5);
     transition:background-image 1s ease-in-out;
 }
-/* REFRESH BUTTON */
-#refresh-btn{
-    position:absolute;
-    top:20px;
-    left:20px;
 
-    background:rgba(0,0,0,0.5);
-    backdrop-filter:blur(15px);
-
-    border:1px solid rgba(255,255,255,0.15);
-    color:#fff;
-
-    width:50px;
-    height:50px;
-
-    border-radius:50%;
-    font-size:20px;
-
-    display:flex;
-    align-items:center;
-    justify-content:center;
-
-    cursor:pointer;
-    z-index:50;
-
-    transition:0.25s;
-}
-
-#refresh-btn:active{
-    transform:rotate(180deg) scale(0.9);
-}
 /* POČASIE */
 #weather-box{
-    <button id="refresh-btn" onclick="manualRefresh()">🔄</button>
     position:absolute;
     top:clamp(12px, 2vw, 20px);
     right:clamp(12px, 2vw, 20px);
@@ -355,7 +324,7 @@ body{
 <body>
 
 <div id="bg"></div>
-<button id="refresh-btn" onclick="manualRefresh()">🔄</button>
+
 <!-- POČASIE -->
 <div id="weather-box">
     <div id="w-icon">--</div>
@@ -496,12 +465,7 @@ function showPage(id, btn) {
     btn.classList.add('active-nav');
 }
 
-async function updateWeather()
-function manualRefresh(){
-    updateWeather();
-    updateAgenda();
-    updateSheetTable();
-}{
+async function updateWeather() {
     try {
         const res = await fetch('https://api.open-meteo.com/v1/forecast?latitude=48.3775&longitude=17.5883&current=temperature_2m,weather_code');
         const data = await res.json();
@@ -611,11 +575,6 @@ updateClock();
 updateWeather();
 updateAgenda();
 updateSheetTable();
-    function manualRefresh(){
-    updateWeather();
-    updateAgenda();
-    updateSheetTable();
-}
 
 setInterval(updateClock, 1000);
 setInterval(updateWeather, 600000);
