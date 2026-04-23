@@ -533,7 +533,21 @@ function updateClock() {
             month: 'long'
         });
 }
+async function saveCell(row, value){
+    try{
+        await fetch("https://script.google.com/macros/s/AKfycbzBloze5aJ9fMtde-tlQXQMmi6yfFYayS9B08ZFML0tbGnxz3mbQVFwh92VUgebZ7xo/exec", {
+            method: "POST",
+            body: JSON.stringify({
+                row: row,
+                value: value
+            })
+        });
 
+        console.log("uložené");
+    }catch(e){
+        console.error("chyba ukladania", e);
+    }
+}
 async function updateBattery() {
     const el = document.getElementById('battery');
     if (!el) return;
